@@ -1,0 +1,65 @@
+version: '3.8'
+
+services:
+  coral-growth-monitor:
+    build:
+      context: ./coral-growth-monitor-service
+      dockerfile: Dockerfile
+    mem_limit: 700m
+    ports:
+      - "8000:8000"
+    networks:
+      - microservices-network
+
+  scheduling:
+    build:
+      context: ./scheduling-service
+      dockerfile: Dockerfile
+    mem_limit: 700m
+    ports:
+      - "8001:8001"
+    networks:
+      - microservices-network
+
+  resource-allocation:
+    build:
+      context: ./resource-allocation-service
+      dockerfile: Dockerfile
+    mem_limit: 700m
+    ports:
+      - "8002:8002"
+    networks:
+      - microservices-network
+
+  user-recommendation:
+    build:
+      context: ./user-recommendation-service
+      dockerfile: Dockerfile
+    mem_limit: 700m
+    ports:
+      - "8003:8003"
+    networks:
+      - microservices-network
+
+  naming-server:
+    build:
+      context: ./naming-server
+      dockerfile: Dockerfile
+    mem_limit: 700m
+    ports:
+      - "8671:8671"
+    networks:
+      - microservices-network
+
+  api-gateway:
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    mem_limit: 700m
+    ports:
+      - "8765:8765"
+    networks:
+      - microservices-network
+
+networks:
+  microservices-network:
