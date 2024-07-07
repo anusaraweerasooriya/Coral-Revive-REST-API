@@ -6,6 +6,7 @@
         <option value="$PROJECT_DIR$/scheduling-service/pom.xml" />
         <option value="$PROJECT_DIR$/resource-allocation-service/pom.xml" />
         <option value="$PROJECT_DIR$/coral-growth-monitor-service/pom.xml" />
+        <option value="$PROJECT_DIR$/user-recommendation-service/pom.xml" />
       </list>
     </option>
   </component>
