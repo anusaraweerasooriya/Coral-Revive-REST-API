@@ -1,0 +1,14 @@
+Component 1
+=========================================
+http://localhost:8000/example-request
+
+API GateWay
+=========================================
+http://localhost:8765/
+http://localhost:8765/coral-growth-monitor-service/example-request
+CORAL-GROWTH-MONITOR-SERVICE/example-request
+
+Eureka
+=========================================
+http://localhost:8671/
+coral-growth-monitor-service
