@@ -6,19 +6,22 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="REST API" />
+        <module name="scheduling-service" />
+        <module name="resource-allocation-service" />
         <module name="coral-growth-monitor-service" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="coral-growth-monitor-service" target="17" />
-      <module name="REST API" target="17" />
+      <module name="resource-allocation-service" target="17" />
+      <module name="scheduling-service" target="17" />
     </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
-      <module name="REST API" options="-parameters" />
       <module name="coral-growth-monitor-service" options="-parameters" />
+      <module name="resource-allocation-service" options="-parameters" />
+      <module name="scheduling-service" options="-parameters" />
     </option>
   </component>
 </project>
