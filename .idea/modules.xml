@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/REST API.iml" filepath="$PROJECT_DIR$/.idea/REST API.iml" />
+      <module fileurl="file://$PROJECT_DIR$/api-gateway/api-gateway.iml" filepath="$PROJECT_DIR$/api-gateway/api-gateway.iml" />
       <module fileurl="file://$PROJECT_DIR$/coral-growth-monitor-service/coral-growth-monitor-service.iml" filepath="$PROJECT_DIR$/coral-growth-monitor-service/coral-growth-monitor-service.iml" />
       <module fileurl="file://$PROJECT_DIR$/naming-server/naming-server.iml" filepath="$PROJECT_DIR$/naming-server/naming-server.iml" />
       <module fileurl="file://$PROJECT_DIR$/resource-allocation-service/resource-allocation-service.iml" filepath="$PROJECT_DIR$/resource-allocation-service/resource-allocation-service.iml" />

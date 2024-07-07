@@ -7,6 +7,7 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="user-recommendation-service" />
+        <module name="api-gateway" />
         <module name="resource-allocation-service" />
         <module name="scheduling-service" />
         <module name="coral-growth-monitor-service" />
@@ -14,6 +15,7 @@
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
+      <module name="api-gateway" target="17" />
       <module name="coral-growth-monitor-service" target="17" />
       <module name="naming-server" target="17" />
       <module name="resource-allocation-service" target="17" />
@@ -23,6 +25,7 @@
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="api-gateway" options="-parameters" />
       <module name="coral-growth-monitor-service" options="-parameters" />
       <module name="naming-server" options="-parameters" />
       <module name="resource-allocation-service" options="-parameters" />
