@@ -1,6 +1,6 @@
 Components
 =========================================
-http://localhost:8000/example-request
+http://localhost:8000/coral-growth-monitor-service/example-request
 http://localhost:8001/scheduling-service
 http://localhost:8002/resource-allocation-service
 http://localhost:8003/user-recommendation-service
@@ -9,7 +9,8 @@ API GateWay
 =========================================
 http://localhost:8765/
 http://localhost:8765/coral-growth-monitor-service/example-request
-CORAL-GROWTH-MONITOR-SERVICE/example-request
+http://localhost:8765/coral-growth-monitor-service/example-request
+http://localhost:8765/user-recommendation-service
 
 Eureka
 =========================================

@@ -17,7 +17,7 @@ public class ExampleController {
     @Autowired
     private ExampleService exampleService;
 
-    @GetMapping("/example-request")
+    @GetMapping("/coral-growth-monitor-service/example-request")
     public ResponseEntity<?> getAllExamples() {
         List<ExampleDTO> examples = exampleService.getAllExamples();
         return new ResponseEntity<>(examples, examples.size() > 0 ? HttpStatus.OK : HttpStatus.NOT_FOUND);
