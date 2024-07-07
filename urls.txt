@@ -1,6 +1,9 @@
-Component 1
+Components
 =========================================
 http://localhost:8000/example-request
+http://localhost:8001/scheduling-service
+http://localhost:8002/resource-allocation-service
+http://localhost:8003/user-recommendation-service
 
 API GateWay
 =========================================
