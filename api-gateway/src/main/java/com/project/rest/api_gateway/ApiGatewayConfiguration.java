@@ -30,6 +30,8 @@ public class ApiGatewayConfiguration {
                         .uri("lb://resource-allocation-service"))
                 .route(p -> p.path("/user-recommendation-service/**")
                         .uri("lb://user-recommendation-service"))
+                .route(p -> p.path("/auth-service/**")
+                        .uri("lb://auth-service"))
                 .build();
     }
 }

@@ -7,6 +7,6 @@ RUN mvn clean package -DskipTests
 
 FROM openjdk:17-jdk-slim
 WORKDIR /app
-COPY --from=build /app/target/naming-server-0.0.1-SNAPSHOT.jar ./naming-server.jar
-EXPOSE 8671
-ENTRYPOINT ["java", "-jar", "naming-server.jar"]
+COPY --from=build /app/target/auth-service-0.0.1-SNAPSHOT.jar ./auth-service.jar
+EXPOSE 50505
+ENTRYPOINT ["java", "-jar", "auth-service.jar"]

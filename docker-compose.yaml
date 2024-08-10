@@ -50,6 +50,10 @@ services:
       - "8671:8671"
     networks:
       - microservices-network
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://naming-server:8671/eureka/
+      - EUREKA_CLIENT_REGISTER_WITH_EUREKA=false
+      - EUREKA_CLIENT_FETCH_REGISTRY=false
 
   api-gateway:
     build:
@@ -57,9 +61,27 @@ services:
       dockerfile: Dockerfile
     mem_limit: 700m
     ports:
-      - "8765:8765"
+      - "8888:8765"
     networks:
       - microservices-network
+    depends_on:
+      - naming-server
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://naming-server:8671/eureka
+
+  auth-service:
+    build:
+      context: ./auth-service
+      dockerfile: Dockerfile
+    mem_limit: 700m
+    ports:
+      - "50505:50505"
+    networks:
+      - microservices-network
+    depends_on:
+      - naming-server
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://naming-server:8671/eureka
 
 networks:
   microservices-network:
