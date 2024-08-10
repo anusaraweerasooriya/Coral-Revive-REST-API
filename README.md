@@ -15,6 +15,7 @@
 - scheduling-service : `8001`
 - resource-allocation-service : `8002`
 - user-recommendation-service : `8003`
+- auth-service : `50505`
 
 ## Locally setup application
 
