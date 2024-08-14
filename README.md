@@ -16,6 +16,7 @@
 - resource-allocation-service : `8002`
 - user-recommendation-service : `8003`
 - auth-service : `50505`
+- flask-service: `5000`
 
 ## Locally setup application
 
@@ -23,7 +24,7 @@
 - Clone the project
 - Run services sperately
 - order -> naming server -> api gateway -> other services
-- to run flask-server open the flask server using vscode and run python `wsgi.py`
+- to run flask-server open the flask server using vscode and run `python wsgi.py`
 
 ### Approach 02 (docker compose):
 - Clone the project
