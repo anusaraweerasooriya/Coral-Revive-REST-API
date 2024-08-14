@@ -22,6 +22,8 @@
 ### Approach 01:
 - Clone the project
 - Run services sperately
+- order -> naming server -> api gateway -> other services
+- to run flask-server open the flask server using vscode and run python `wsgi.py`
 
 ### Approach 02 (docker compose):
 - Clone the project
