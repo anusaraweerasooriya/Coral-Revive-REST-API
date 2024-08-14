@@ -4,6 +4,8 @@ http://localhost:8000/coral-growth-monitor-service/example-request
 http://localhost:8001/scheduling-service
 http://localhost:8002/resource-allocation-service
 http://localhost:8003/user-recommendation-service
+http://localhost:50505/auth-service/authenticate
+http://localhost:50505/auth-service/register
 
 API GateWay
 =========================================
@@ -11,6 +13,7 @@ http://localhost:8765/
 http://localhost:8765/coral-growth-monitor-service/example-request
 http://localhost:8765/coral-growth-monitor-service/example-request
 http://localhost:8765/user-recommendation-service
+http://localhost:8765/auth-service/register
 
 Eureka
 =========================================
