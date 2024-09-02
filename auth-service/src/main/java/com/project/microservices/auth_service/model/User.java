@@ -10,6 +10,7 @@ import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Set;
 
 @Getter
@@ -35,6 +36,12 @@ public class User {
     private String password;
 
     private Set<Role> roles;
+
+    // Set to store the IDs of the users being followed
+    private Set<String> following = new HashSet<>();
+
+    // Set to store the IDs of the followers
+    private Set<String> followers = new HashSet<>();
 
 }
 

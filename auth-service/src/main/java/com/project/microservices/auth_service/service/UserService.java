@@ -56,4 +56,44 @@ public class UserService implements UserDetailsService {
         return userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
+
+    public User followUser(String userId, String userIdToFollow) {
+        Optional<User> userOptional = userRepository.findById(userId);
+        Optional<User> userToFollowOptional = userRepository.findById(userIdToFollow);
+
+        if (userOptional.isPresent() && userToFollowOptional.isPresent()) {
+            User user = userOptional.get();
+            User userToFollow = userToFollowOptional.get();
+
+            if (user.getFollowing().add(userToFollow.getId())) { 
+                userToFollow.getFollowers().add(user.getId());
+                userRepository.save(userToFollow);
+                return userRepository.save(user); 
+            }
+        }
+        return null; 
+    }
+
+    // Unfollow a user
+    public User unfollowUser(String userId, String userIdToUnfollow) {
+        Optional<User> userOptional = userRepository.findById(userId);
+        Optional<User> userToUnfollowOptional = userRepository.findById(userIdToUnfollow);
+
+        if (userOptional.isPresent() && userToUnfollowOptional.isPresent()) {
+            User user = userOptional.get();
+            User userToUnfollow = userToUnfollowOptional.get();
+
+            if (user.getFollowing().remove(userToUnfollow.getId())) { 
+                userToUnfollow.getFollowers().remove(user.getId());
+                userRepository.save(userToUnfollow);
+                return userRepository.save(user); 
+            }
+        }
+        return null; 
+    }
+
+    public Optional<User> getUserById(String userId) {
+        return userRepository.findById(userId);
+    }
+
 }
