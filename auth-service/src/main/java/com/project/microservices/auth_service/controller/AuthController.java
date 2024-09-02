@@ -3,13 +3,16 @@ package com.project.microservices.auth_service.controller;
 import com.project.microservices.auth_service.jwt.JwtUtil;
 import com.project.microservices.auth_service.model.User;
 import com.project.microservices.auth_service.service.UserService;
+
+import java.util.HashMap;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.*;
-
+import java.util.Map;
 @RestController
 @RequestMapping("/auth-service")
 public class AuthController {
@@ -27,19 +30,26 @@ public class AuthController {
     private UserService userService;
 
     @PostMapping("/authenticate")
-    public String authenticate(@RequestBody User user) throws Exception {
+    public Map<String, Object> authenticate(@RequestBody User user) throws Exception {
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword())
             );
         } catch (Exception e) {
-            throw new Exception(e.getMessage());
+            throw new Exception("Invalid username or password", e);
         }
 
         UserDetails userDetails = userDetailsService.loadUserByUsername(user.getUsername());
         User responseUser = userService.findByUsername(userDetails.getUsername());
-        return jwtUtil.generateToken(responseUser);
+        String token = jwtUtil.generateToken(responseUser);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("token", token);
+        response.put("user", responseUser);
+
+        return response;
     }
+
 
     @PostMapping("/register")
     public User register(@RequestBody User user) throws Exception {
@@ -57,7 +67,7 @@ public class AuthController {
     public boolean validateToken(@RequestHeader("Authorization") String token) {
         try {
             String jwtToken = token.substring(7);
-            String username = jwtUtil.extractUsername(jwtToken);
+            String username = jwtUtil.extractUserId(jwtToken);
             return jwtUtil.validateToken(jwtToken, username);
         } catch (Exception e) {
             return false;
