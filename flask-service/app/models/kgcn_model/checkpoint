@@ -1,0 +1,2 @@
+model_checkpoint_path: "/Users/seminipeiris/Desktop/Coral-Revive-REST-API/flask-service/app/models/kgcn_model/model.ckpt"
+all_model_checkpoint_paths: "/Users/seminipeiris/Desktop/Coral-Revive-REST-API/flask-service/app/models/kgcn_model/model.ckpt"
