@@ -22,5 +22,7 @@ def initialize_services():
         "comment_classification_service": comment_classification_service,
         "training_service":training_service,
         "recommendation_service":recommendation_service,
-        "text_classification_service":text_classification_service   
+        "text_classification_service":text_classification_service  
     }
+
+
