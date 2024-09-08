@@ -41,11 +41,8 @@ class CommentClassificationService:
     def classify_comment(self, post, comment, threshold=0.5):
         try:
             logging.info("Starting classification process.")
-            
-            # Step 1: Classify with DistilBERT to check if it's semantic
             logging.info("Tokenizing comment for DistilBERT.")
             distilbert_input = self.distilbert_tokenizer(comment, return_tensors='pt', truncation=True, padding=True, max_length=128)
-            
             logging.info("Running DistilBERT model inference.")
             distilbert_output = self.distilbert_model(**distilbert_input)
             
@@ -60,12 +57,10 @@ class CommentClassificationService:
             
             logging.info(f"DistilBERT predicted class: {distilbert_pred_class}")
 
-            # Determine if DistilBERT predicts semantic
             if distilbert_pred_class == 1:
                 logging.info("Comment classified as semantic by DistilBERT.")
                 return "semantic"
 
-            # Step 2: If DistilBERT does not predict semantic, use BERT to classify as true or false
             combined_input = f"Post: {post} Comment: {comment}"
             logging.info("Tokenizing combined input for BERT.")
             bert_inputs = self.bert_tokenizer(combined_input, return_tensors='pt', truncation=True, padding=True, max_length=128)
@@ -84,7 +79,6 @@ class CommentClassificationService:
             
             logging.info(f"BERT predicted class: {bert_pred_class}")
 
-            # Step 3: Use a threshold to classify uncertain comments as semantic
             max_prob = torch.max(bert_probs).item()
             logging.info(f"Maximum probability from BERT: {max_prob}")
             
@@ -92,11 +86,9 @@ class CommentClassificationService:
                 logging.info("Maximum probability is below threshold, classifying as semantic.")
                 return "semantic"
 
-            # Map BERT's prediction to label
             bert_prediction = self.label_mapping.get(bert_pred_class, "semantic")
             logging.info(f"BERT prediction mapped to label: {bert_prediction}")
 
-            # Step 4: If BERT predicts factual (True/False), verify with BART
             if bert_prediction in ['True', 'False']:
                 logging.info("Running BART zero-shot classification.")
                 labels = ["true", "false"]
@@ -106,7 +98,6 @@ class CommentClassificationService:
 
                 logging.info(f"BART prediction: {bart_prediction} with score: {bart_score}")
 
-                # Decide final prediction based on BART's prediction
                 final_prediction = "True" if bart_prediction == "true" else "False"
                 logging.info(f"Final classification result after BART verification: {final_prediction}")
                 return final_prediction
@@ -119,7 +110,6 @@ class CommentClassificationService:
 
 
 
-# Example usage for testing purposes
 if __name__ == "__main__":
     service = CommentClassificationService()
     result = service.classify_comment("This is a sample post.", "This is a sample comment.")

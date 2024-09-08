@@ -40,6 +40,23 @@ public class FeedServiceImpl implements FeedService {
         logger.info("Generating feed for user ID: {}", userId);
         List<Map<String, Object>> feedPosts = new ArrayList<>();
 
+        // Fetch the user's own posts
+        logger.info("Fetching user's own posts for user ID: {}", userId);
+        List<Question> userOwnPosts = questionRepository.findByUserId(userId);
+        logger.info("Found {} posts for the user ID: {}", userOwnPosts.size(), userId);
+
+        for (Question post : userOwnPosts) {
+            logger.info("Fetching user details for post ID: {}", post.getId());
+            UserDTO userDTO = userAuthClient.getUserDetails(post.getUserId());
+            logger.info("User details fetched for user ID: {}", post.getUserId());
+
+            Map<String, Object> postWithUser = new HashMap<>();
+            postWithUser.put("question", post);
+            postWithUser.put("user", userDTO);
+            feedPosts.add(postWithUser);
+        }
+
+        // Fetch posts from users the current user is following
         List<String> followedUserIds = getFollowedUserIds(userId);
         logger.info("User {} is following {} users", userId, followedUserIds.size());
 

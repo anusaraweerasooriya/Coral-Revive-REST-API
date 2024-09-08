@@ -53,17 +53,11 @@ public class CommentController {
         logger.info("Token is valid. Proceeding to add comment.");
         
         try {
-            // Add the comment to the comment storage
             Comment addedComment = commentService.addComment(comment);
             logger.info("Comment added successfully with ID: {}", addedComment.getId());
-
-            // Retrieve the corresponding question by ID
             Question question = questionService.getQuestionById(addedComment.getQuestionId());
             if (question != null) {
-                // Add the comment to the question's comments set
                 question.getComments().add(addedComment.getUserId());
-
-                // Update the question in the database or relevant storage
                 questionService.updateQuestion(question);
                 logger.info("Comment associated with Question ID: {}", question.getId());
             } else {
@@ -77,9 +71,6 @@ public class CommentController {
         }
     }
 
-    
-
-    // Endpoint to get a specific comment by ID
     @GetMapping("/{id}")
     public ResponseEntity<Comment> getCommentById(@PathVariable String id) {
         Comment comment = commentService.getCommentById(id);
@@ -90,31 +81,22 @@ public class CommentController {
         }
     }
 
-    // Endpoint to get comments by question ID
     @GetMapping("/question/{questionId}")
     public ResponseEntity<List<Map<String, Object>>> getCommentsByQuestionId(@PathVariable String questionId) {
     List<Comment> comments = commentService.getCommentsByQuestionId(questionId);
-
-    // Prepare a list to hold the combined comment and user information
     List<Map<String, Object>> commentsWithUser = new ArrayList<>();
 
     for (Comment comment : comments) {
-        // Retrieve user information using the userId from the comment
         UserDTO userDTO = userAuthClient.getUserDetails(comment.getUserId());
-
-        // Create a map to hold both the comment and the user information
         Map<String, Object> commentWithUser = new HashMap<>();
         commentWithUser.put("comment", comment);
         commentWithUser.put("user", userDTO);
-
-        // Add the map to the list
         commentsWithUser.add(commentWithUser);
     }
 
     return ResponseEntity.ok(commentsWithUser);
     }
 
-    // Endpoint to get comments by user ID
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<Comment>> getCommentsByUserId(@PathVariable String userId) {
         List<Comment> comments = commentService.getCommentsByUserId(userId);

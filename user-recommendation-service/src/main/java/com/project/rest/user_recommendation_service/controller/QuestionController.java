@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.project.rest.user_recommendation_service.service.UserAuthClient;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -163,4 +164,27 @@ public class QuestionController {
         List<Question> feedQuestions = questionService.getQuestionsForFeed(userId);
         return ResponseEntity.ok(feedQuestions);
     }
+
+    @GetMapping("/category/{category}")
+    public ResponseEntity<List<Map<String, Object>>> getQuestionsByCategory(@PathVariable String category) {
+    // Fetch questions by category
+    List<Question> questions = questionService.getQuestionsByCategory(category);
+    
+    if (questions == null || questions.isEmpty()) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+    }
+    List<Map<String, Object>> responseList = new ArrayList<>();
+    for (Question question : questions) {
+        UserDTO userDTO = userAuthClient.getUserDetails(question.getUserId());
+        Map<String, Object> responseMap = new HashMap<>();
+        responseMap.put("question", question);  
+        responseMap.put("user", userDTO);       
+
+        responseList.add(responseMap);
+    }
+
+    return ResponseEntity.ok(responseList);
+}
+
+
 }

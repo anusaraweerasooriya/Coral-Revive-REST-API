@@ -96,4 +96,15 @@ public class UserService implements UserDetailsService {
         return userRepository.findById(userId);
     }
 
+    public User updateProfilePic(String userId, String profilePicUrl) throws Exception {
+        Optional<User> userOptional = userRepository.findById(userId);
+        if (!userOptional.isPresent()) {
+            throw new Exception("User not found");
+        }
+        User user = userOptional.get();
+        user.setProfilePicUrl(profilePicUrl);
+        return userRepository.save(user);
+    }
+    
+
 }

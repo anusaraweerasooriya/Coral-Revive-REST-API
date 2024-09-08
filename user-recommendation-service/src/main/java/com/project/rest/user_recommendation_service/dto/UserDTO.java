@@ -7,8 +7,8 @@ public class UserDTO {
     private String username;
     private List<String> following;
     private List<String> followers;
+    private String profilePicUrl; 
 
-    // Getters and Setters
     public String getId() {
         return id;
     }
@@ -39,5 +39,13 @@ public class UserDTO {
 
     public void setFollowers(List<String> followers) {
         this.followers = followers;
+    }
+
+    public String getProfilePicUrl() {
+        return profilePicUrl;
+    }
+
+    public void setProfilePicUrl(String profilePicUrl) {
+        this.profilePicUrl = profilePicUrl;
     }
 }
