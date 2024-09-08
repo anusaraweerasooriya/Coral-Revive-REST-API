@@ -10,8 +10,14 @@ from app.routes.resource_estimation_routes import (
     task_skill_matching_bp,
     oxygen_capacity_bp,
 )
+from app.routes.weather_routes import weather_routes
+from app.routes.schedule_routes import schedule_routes
 
 def init_routes(app):
+    app.register_blueprint(coral_growth_monitor,
+                           url_prefix='/api/coral-growth-monitor')
+    app.register_blueprint(weather_routes, url_prefix='/api/weather')
+    app.register_blueprint(schedule_routes, url_prefix='/api/schedule')
     app.register_blueprint(coral_growth_monitor, url_prefix='/api/coral-growth-monitor')
     app.register_blueprint(reef_bowl_estimation_bp, url_prefix='/api/reef-bowl-estimation')
     app.register_blueprint(manpower_estimation_bp, url_prefix='/api/manpower-estimation')
@@ -22,3 +28,4 @@ def init_routes(app):
     app.register_blueprint(task_manpower_estimation_bp, url_prefix='/api/task-manpower-estimation')
     app.register_blueprint(task_skill_matching_bp, url_prefix='/api/task-skill-matching')
     app.register_blueprint(oxygen_capacity_bp, url_prefix='/api/oxygen-capacity-estimation')
+

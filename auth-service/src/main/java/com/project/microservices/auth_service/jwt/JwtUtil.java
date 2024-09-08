@@ -1,6 +1,5 @@
 package com.project.microservices.auth_service.jwt;
 
-
 import com.project.microservices.auth_service.model.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -23,6 +22,10 @@ public class JwtUtil {
         return extractClaim(token, Claims::getSubject);
     }
 
+    public String extractUserId(String token) {
+        return extractClaim(token, claims -> claims.get("userId", String.class));
+    }
+
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = extractAllClaims(token);
         return claimsResolver.apply(claims);
@@ -38,6 +41,7 @@ public class JwtUtil {
 
     public String generateToken(User user) {
         Map<String, Object> claims = new HashMap<>();
+        claims.put("userId", user.getId()); 
         claims.put("fullName", user.getFullName());
         claims.put("dateOfBirth", user.getDateOfBirth().toString());
         claims.put("nic", user.getNic());
@@ -56,9 +60,9 @@ public class JwtUtil {
                 .compact();
     }
 
-    public Boolean validateToken(String token, String username) {
-        final String extractedUsername = extractUsername(token);
-        return (extractedUsername.equals(username) && !isTokenExpired(token));
+    public Boolean validateToken(String token, String userId) {
+        final String extractedUserId = extractUserId(token);
+        return (extractedUserId.equals(userId) && !isTokenExpired(token));
     }
 
     private Boolean isTokenExpired(String token) {
