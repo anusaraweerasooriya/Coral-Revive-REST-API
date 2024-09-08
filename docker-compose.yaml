@@ -31,7 +31,7 @@ services:
     networks:
       - microservices-network
 
-  user-recommendation:
+  user-recommendation-service:
     build:
       context: ./user-recommendation-service
       dockerfile: Dockerfile
@@ -40,6 +40,10 @@ services:
       - "8003:8003"
     networks:
       - microservices-network
+    depends_on:
+      - naming-server
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://naming-server:8671/eureka
 
   naming-server:
     build:
@@ -76,6 +80,20 @@ services:
     mem_limit: 700m
     ports:
       - "50505:50505"
+    networks:
+      - microservices-network
+    depends_on:
+      - naming-server
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://naming-server:8671/eureka
+
+  flask-server:
+    build:
+      context: ./flask-service
+      dockerfile: Dockerfile
+    mem_limit: 1g
+    ports:
+      - "5000:5000"
     networks:
       - microservices-network
     depends_on:

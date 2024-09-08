@@ -14,5 +14,6 @@ public interface QuestionService {
     Question shareQuestion(String questionId, String userId);
     Question updateQuestion(Question question);
     boolean deleteQuestion(String questionId);
+    List<Question> getQuestionsByCategory(String category);
 
 }

@@ -54,4 +54,14 @@ public class UserController {
         String jwtToken = token.substring(7);
         return jwtUtil.extractUserId(jwtToken);
     }
+
+    @PutMapping("/{userId}/profile-pic")
+    public ResponseEntity<?> updateProfilePic(@PathVariable String userId, @RequestBody String profilePicUrl) {
+        try {
+            User updatedUser = userService.updateProfilePic(userId, profilePicUrl);
+            return ResponseEntity.ok(updatedUser);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+    }
 }

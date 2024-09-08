@@ -3,6 +3,7 @@ package com.project.rest.user_recommendation_service.service.impl;
 import com.project.rest.user_recommendation_service.model.Question;
 import com.project.rest.user_recommendation_service.repository.QuestionRepository;
 import com.project.rest.user_recommendation_service.service.api.QuestionService;
+import com.project.rest.user_recommendation_service.service.PostClassificationClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -10,6 +11,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.HashSet;
 
 @Service
 public class QuestionServiceImpl implements QuestionService {
@@ -17,12 +19,47 @@ public class QuestionServiceImpl implements QuestionService {
     @Autowired
     private QuestionRepository questionRepository;
 
+    @Autowired
+    private PostClassificationClient postClassificationClient; 
+
+
     @Override
     public Question createQuestion(Question question) {
+        if (question.getLikedBy() == null) {
+            question.setLikedBy(new HashSet<>());
+        }
+        if (question.getDislikedBy() == null) {
+            question.setDislikedBy(new HashSet<>());
+        }
+        if (question.getSharedBy() == null) {
+            question.setSharedBy(new HashSet<>());
+        }
+        if (question.getComments() == null) {
+            question.setComments(new HashSet<>());
+        }
+        
+        // Get categories from the PostClassificationClient
+        List<String> categories = postClassificationClient.classifyPost(question.getContent());
+        
+        // Only add categories if the classification returned non-null and non-empty
+        if (categories != null && !categories.isEmpty()) {
+            Set<String> categorySet = new HashSet<>(categories);
+            question.setCategory(categorySet); 
+        } else {
+            // Ensure the category field is initialized, even if no categories are returned
+            if (question.getCategory() == null) {
+                question.setCategory(new HashSet<>());
+            }
+        }
+
+        // Set other fields
         question.setOriginalUserId(null); 
         question.setRecommended(false);  
+        
+        // Save the question
         return questionRepository.save(question);
     }
+
 
     @Override
     public Question getQuestionById(String id) {
@@ -37,9 +74,7 @@ public class QuestionServiceImpl implements QuestionService {
 
     @Override
     public List<Question> getQuestionsForFeed(String userId) {
-        // Placeholder logic: Extend this to include shared and recommended posts
         List<Question> userPosts = questionRepository.findByUserId(userId);
-        // Add logic here to fetch shared posts and recommended posts if needed
         return userPosts;
     }
 
@@ -48,15 +83,11 @@ public class QuestionServiceImpl implements QuestionService {
         Question question = getQuestionById(questionId);
         if (question != null) {
             if (question.getLikedBy().contains(userId)) {
-                // User already liked the question, remove the like
                 question.getLikedBy().remove(userId);
             } else {
-                // If the user has disliked the question, remove the dislike
                 question.getDislikedBy().remove(userId);
-                // Add the like
                 question.getLikedBy().add(userId);
             }
-            // Save the updated question
             return questionRepository.save(question);
         }
         return null;
@@ -67,20 +98,15 @@ public class QuestionServiceImpl implements QuestionService {
         Question question = getQuestionById(questionId);
         if (question != null) {
             if (question.getDislikedBy().contains(userId)) {
-                // User already disliked the question, remove the dislike
                 question.getDislikedBy().remove(userId);
             } else {
-                // If the user has liked the question, remove the like
                 question.getLikedBy().remove(userId);
-                // Add the dislike
                 question.getDislikedBy().add(userId);
             }
-            // Save the updated question
             return questionRepository.save(question);
         }
         return null;
     }
-
 
     @Override
     public Question shareQuestion(String questionId, String userId) {
@@ -91,9 +117,9 @@ public class QuestionServiceImpl implements QuestionService {
             sharedQuestion.setOriginalUserId(question.getUserId()); 
             sharedQuestion.setContent(question.getContent());
             sharedQuestion.setCreatedAt(new Date());
-            sharedQuestion.setSharedBy(question.getSharedBy()); 
+            sharedQuestion.setSharedBy(question.getSharedBy());
 
-            question.getSharedBy().add(userId); 
+            question.getSharedBy().add(userId);
             questionRepository.save(question); 
 
             return questionRepository.save(sharedQuestion); 
@@ -112,6 +138,10 @@ public class QuestionServiceImpl implements QuestionService {
             return true;
         }
         return false;
+    }
+
+    public List<Question> getQuestionsByCategory(String category) {
+        return questionRepository.findByCategory(category);
     }
 
 }

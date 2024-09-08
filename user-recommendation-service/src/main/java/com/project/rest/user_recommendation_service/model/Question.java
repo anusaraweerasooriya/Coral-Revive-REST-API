@@ -16,7 +16,8 @@ public class Question {
 
     // New fields
     private String originalUserId; // ID of the original poster (if shared)
-    private boolean isRecommended; // Flag to indicate if the post is recommended by the system
+    private boolean isRecommended;
+    private Set<String> category = new HashSet<>();
 
     public Question() {}
 
@@ -107,5 +108,13 @@ public class Question {
 
     public void setRecommended(boolean recommended) {
         isRecommended = recommended;
+    }
+
+    public Set<String> getCategory() {
+        return category;
+    }
+
+    public void setCategory(Set<String> category) {
+        this.category = category;
     }
 }

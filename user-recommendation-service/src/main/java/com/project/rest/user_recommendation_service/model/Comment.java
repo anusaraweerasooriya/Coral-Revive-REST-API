@@ -4,11 +4,11 @@ import java.util.Date;
 
 public class Comment {
     private String id;
-    private String questionId;  // Field to link the comment to a question
-    private String userId;  // ID of the user who made the comment
-    private String content;  // The content of the comment
-    private Date createdAt;  // Date when the comment was created
-    private String verified;  // Can be "semantic", "false", or "true"
+    private String questionId;  
+    private String userId;  
+    private String content;  
+    private Date createdAt; 
+    private String verified;  
 
     // Constructors
     public Comment() {}

@@ -10,16 +10,16 @@ import org.springframework.web.client.RestTemplate;
 public class CommentVerificationClient {
 
     @Autowired
-    private RestTemplate restTemplate;
+    private RestTemplate loadBalancedRestTemplate;
 
-    private static final String FLASK_SERVICE_URL = "http://flask-service/api/comment-verification/classify";
+    private static final String FLASK_SERVICE_URL = "http://127.0.0.1:5000/api/comment-verification/classify";
 
     public String classifyComment(String postContent, String commentContent) {
 
         CommentClassificationRequestDTO requestDTO = new CommentClassificationRequestDTO(postContent, commentContent);
 
-        CommentClassificationResponseDTO responseDTO = restTemplate.postForObject(FLASK_SERVICE_URL, requestDTO, CommentClassificationResponseDTO.class);
-
+        CommentClassificationResponseDTO responseDTO = loadBalancedRestTemplate.postForObject(
+            FLASK_SERVICE_URL, requestDTO, CommentClassificationResponseDTO.class);
         return responseDTO != null ? responseDTO.getClassification() : "false";
     }
 }
