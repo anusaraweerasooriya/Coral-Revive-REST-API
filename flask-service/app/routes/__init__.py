@@ -13,6 +13,7 @@ from app.routes.update_model_routes import training_bp
 from app.routes.weather_routes import weather_routes
 
 
+
 def init_routes(app):
     app.register_blueprint(coral_growth_monitor, url_prefix='/api/coral-growth-monitor')
     app.register_blueprint(weather_routes, url_prefix='/api/weather')
