@@ -43,7 +43,5 @@ public class User {
     // Set to store the IDs of the followers
     private Set<String> followers = new HashSet<>();
 
-    private String profilePicUrl;
-
 }
 
