@@ -49,6 +49,20 @@ public class ScheduleServiceImpl implements ScheduleService {
     }
 
     @Override
+    public Schedule updateResourceAvailability(String scheduleId) {
+        Optional<Schedule> optionalSchedule = scheduleRepository.findById(scheduleId);
+
+        if (optionalSchedule.isPresent()) {
+            Schedule schedule = optionalSchedule.get();
+            schedule.setStatus(Schedule.Status.Pending_Date_Schedule);
+            schedule.setLastUpdated(Date.from(ZonedDateTime.now().toInstant())); 
+            return scheduleRepository.save(schedule);
+        } else {
+            throw new RuntimeException("Schedule not found with id: " + scheduleId);
+        }
+    }
+
+    @Override
     public long countSchedulesByStatus(Schedule.Status status) {
         return scheduleRepository.countByStatus(status);
     }
