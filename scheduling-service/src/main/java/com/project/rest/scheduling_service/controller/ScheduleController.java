@@ -31,6 +31,12 @@ public class ScheduleController {
         return new ResponseEntity<>(updatedSchedule, HttpStatus.OK);
     }
 
+    @PatchMapping("{scheduleId}/setResourceAvailability")
+    public ResponseEntity<Schedule> updateResourceAvailability(@PathVariable String scheduleId) {
+        Schedule updatedSchedule = scheduleService.updateResourceAvailability(scheduleId);
+        return new ResponseEntity<>(updatedSchedule, HttpStatus.OK);
+    }
+
     @GetMapping("/count/scheduled")
     public ResponseEntity<Long> countScheduled() {
         long count = scheduleService.countSchedulesByStatus(Schedule.Status.Scheduled);
