@@ -7,6 +7,7 @@ import java.time.ZonedDateTime;
 public interface ScheduleService {
     Schedule createSchedule(Schedule schedule);
     Schedule updateScheduledDate(String scheduleId, ZonedDateTime scheduledDate);
+    Schedule updateResourceAvailability(String scheduleId);
     List<Schedule> getPrioritizedSchedules();
 
     long countSchedulesByStatus(Schedule.Status status);
