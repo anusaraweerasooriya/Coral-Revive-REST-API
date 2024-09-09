@@ -1,0 +1,10 @@
+Flask
+requests
+numpy
+pandas
+Flask-Cors
+Flask-RESTful
+Flask-SQLAlchemy
+Flask-Migrate
+torch
+transformers
