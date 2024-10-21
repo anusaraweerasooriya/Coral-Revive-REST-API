@@ -1,7 +1,7 @@
 import logging
 import os
 import torch
-from transformers import BertForSequenceClassification, BertTokenizer, DistilBertForSequenceClassification, DistilBertTokenizer, pipeline
+from transformers import BertForSequenceClassification, BertTokenizer, DistilBertForSequenceClassification, DistilBertTokenizer, GPT2LMHeadModel, GPT2Tokenizer
 
 # Set up logging to display detailed error messages
 logging.basicConfig(level=logging.DEBUG)
@@ -12,19 +12,21 @@ class CommentClassificationService:
             # Directly use the specified model paths
             distilbert_dir = "/app/models/comment-validation-service/distilbert_semantic_classifier"
             bert_dir = "/app/models/comment-validation-service/coral_comment_classifier"
-            bart_dir = "/app/models/comment-validation-service/bart-large-mnli"
+            gpt2_dir = "/app/models/comment-validation-service/gpt2_model"
 
             # Check if directories exist, download models if necessary
             if not os.path.exists(distilbert_dir):
                 logging.error(f"DistilBERT directory not found: {distilbert_dir}")
             if not os.path.exists(bert_dir):
                 logging.error(f"BERT directory not found: {bert_dir}")
-            if not os.path.exists(bart_dir):
-                logging.info(f"BART directory not found, downloading and saving to: {bart_dir}")
-                os.makedirs(bart_dir, exist_ok=True)
-                bart_classifier = pipeline("zero-shot-classification", model="facebook/bart-large-mnli")
-                bart_classifier.save_pretrained(bart_dir)
-                logging.info("BART model downloaded and saved successfully.")
+            if not os.path.exists(gpt2_dir):
+                logging.info(f"GPT-2 directory not found, downloading and saving to: {gpt2_dir}")
+                os.makedirs(gpt2_dir, exist_ok=True)
+                gpt2_model = GPT2LMHeadModel.from_pretrained("gpt2")
+                gpt2_model.save_pretrained(gpt2_dir)
+                gpt2_tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
+                gpt2_tokenizer.save_pretrained(gpt2_dir)
+                logging.info("GPT-2 model downloaded and saved successfully.")
 
             # Load models and tokenizers
             self.distilbert_model = DistilBertForSequenceClassification.from_pretrained(distilbert_dir, use_safetensors=True)
@@ -33,13 +35,25 @@ class CommentClassificationService:
             self.bert_model = BertForSequenceClassification.from_pretrained(bert_dir, use_safetensors=True)
             self.bert_tokenizer = BertTokenizer.from_pretrained(bert_dir)
 
-            self.bart_classifier = pipeline("zero-shot-classification", model=bart_dir)
+            self.gpt2_model = GPT2LMHeadModel.from_pretrained(gpt2_dir).to(torch.device('cuda' if torch.cuda.is_available() else 'cpu'))
+            self.gpt2_tokenizer = GPT2Tokenizer.from_pretrained(gpt2_dir)
             logging.info("Models and tokenizers loaded successfully.")
 
             self.label_mapping = {1: 'True', 0: 'False', 2: 'semantic'}
 
         except Exception as e:
             logging.error("An error occurred during model loading.", exc_info=True)
+
+    def gpt2_score_text(self, text):
+        try:
+            inputs = self.gpt2_tokenizer.encode(text, return_tensors='pt').to(torch.device('cuda' if torch.cuda.is_available() else 'cpu'))
+            with torch.no_grad():
+                outputs = self.gpt2_model(inputs, labels=inputs)
+                loss = outputs.loss
+            return loss.item()  # Lower loss indicates more likely text
+        except Exception as e:
+            logging.error("An error occurred during GPT-2 scoring.", exc_info=True)
+            return float('inf')  # Return a high score in case of an error
 
     def classify_comment(self, post, comment, threshold=0.5):
         try:
@@ -93,16 +107,18 @@ class CommentClassificationService:
             logging.info(f"BERT prediction mapped to label: {bert_prediction}")
 
             if bert_prediction in ['True', 'False']:
-                logging.info("Running BART zero-shot classification.")
-                labels = ["true", "false"]
-                bart_result = self.bart_classifier(comment, candidate_labels=labels, hypothesis_template="This comment is {}.")
-                bart_prediction = bart_result['labels'][0]
-                bart_score = bart_result['scores'][0]
+                logging.info("Running GPT-2 for verification.")
+                true_text = f"The following statement is true: {comment}"
+                false_text = f"The following statement is false: {comment}"
 
-                logging.info(f"BART prediction: {bart_prediction} with score: {bart_score}")
+                true_score = self.gpt2_score_text(true_text)
+                false_score = self.gpt2_score_text(false_text)
 
-                final_prediction = "True" if bart_prediction == "true" else "False"
-                logging.info(f"Final classification result after BART verification: {final_prediction}")
+                logging.info(f"GPT-2 Scores - True: {true_score}, False: {false_score}")
+
+                # Choose the label with the lower score (higher likelihood)
+                final_prediction = "True" if true_score < false_score else "False"
+                logging.info(f"Final classification result after GPT-2 verification: {final_prediction}")
                 return final_prediction
 
             return bert_prediction
@@ -115,4 +131,3 @@ if __name__ == "__main__":
     service = CommentClassificationService()
     result = service.classify_comment("This is a sample post.", "This is a sample comment.")
     print("Classification result:", result)
-

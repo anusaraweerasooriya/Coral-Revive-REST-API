@@ -4,7 +4,6 @@ from app.services.post_classification_service import PostClassificationService
 # Initialize the Flask blueprint for the route
 post_classification_bp = Blueprint('post_classification_route', __name__)
 
-# Initialize the BART classification service
 classification_service = PostClassificationService()
 
 # Define the route to classify text
