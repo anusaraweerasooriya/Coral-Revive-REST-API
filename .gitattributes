@@ -1,1 +1,2 @@
 flask-service/app/models/comment-validation-service/distilbert_semantic_classifier/* filter=lfs diff=lfs merge=lfs -text
+flask-service/app/models/comment-validation-service/coral_comment_classifier/* filter=lfs diff=lfs merge=lfs -text
