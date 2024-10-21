@@ -14,7 +14,7 @@ public class PostClassificationClient {
     @Autowired
     private RestTemplate loadBalancedRestTemplate;
 
-    private static final String FLASK_SERVICE_URL = "http://127.0.0.1:5000/api/classifyPost";
+    private static final String FLASK_SERVICE_URL = "http://flask-server:5000/api/classifyPost";
 
     public List<String> classifyPost(String postContent) {
         PostClassificationRequestDTO requestDTO = new PostClassificationRequestDTO(postContent);

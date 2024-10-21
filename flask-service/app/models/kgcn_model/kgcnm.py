@@ -1,19 +1,22 @@
-import pandas as pd
-import numpy as np
-from sklearn.metrics import accuracy_score, f1_score,roc_auc_score
 import tensorflow as tf
-from tensorflow.python.keras.layers import Embedding
+import numpy as np
+from sklearn.metrics import f1_score, roc_auc_score
 from .kgcna import SumAggregator, NeighborAggregator, ConcatAggregator
 
-# Disable eager execution (TensorFlow 2.x default) to use the session-based execution model
-tf.compat.v1.disable_eager_execution()
-
-class KGCN(object):
+class KGCN:
     def __init__(self, args, n_user, n_entity, n_relation, adj_entity, adj_relation):
+        # Disable eager execution only within this class
+        self._disable_eager_execution()
         self._parse_args(args, adj_entity, adj_relation)
         self._build_inputs()
         self._build_model(n_user, n_entity, n_relation)
         self._build_train()
+
+    def _disable_eager_execution(self):
+        if not tf.executing_eagerly():
+            return
+        tf.compat.v1.disable_eager_execution()
+        print("Eager execution disabled for KGCN")
 
     @staticmethod
     def get_initializer():
@@ -124,7 +127,7 @@ class KGCN(object):
 
     def get_scores(self, sess, feed_dict):
         return sess.run([self.item_indices, self.scores_normalized], feed_dict)
-    
+
     def save(self, save_path):
         saver = tf.compat.v1.train.Saver()
         with tf.compat.v1.Session() as sess:

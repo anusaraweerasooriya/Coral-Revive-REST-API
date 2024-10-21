@@ -20,6 +20,8 @@ services:
       - "8001:8001"
     networks:
       - microservices-network
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://naming-server:8671/eureka
 
   resource-allocation:
     build:
@@ -44,6 +46,17 @@ services:
       - naming-server
     environment:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://naming-server:8671/eureka
+      - RATINGS_FILE_PATH=/app/ratings_final.txt
+      - USER_MAP_FILE_PATH=/app/user_mapping.json
+      - ITEM_MAP_FILE_PATH=/app/item_mapping.json
+      - KG_FILE_PATH=/app/kg_final.txt
+      - POST_MAP_FILE_PATH=/app/post_mapping.json
+    volumes:
+      - ./user-recommendation-service/ratings_final.txt:/app/ratings_final.txt
+      - ./user-recommendation-service/user_mapping.json:/app/user_mapping.json
+      - ./user-recommendation-service/item_mapping.json:/app/item_mapping.json
+      - ./user-recommendation-service/kg_final.txt:/app/kg_final.txt
+      - ./user-recommendation-service/post_mapping.json:/app/post_mapping.json
 
   naming-server:
     build:
@@ -91,7 +104,7 @@ services:
     build:
       context: ./flask-service
       dockerfile: Dockerfile
-    mem_limit: 1g
+    mem_limit: 4g
     ports:
       - "5000:5000"
     networks:
@@ -100,6 +113,17 @@ services:
       - naming-server
     environment:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://naming-server:8671/eureka
+      - RATINGS_FILE_PATH=/app/ratings_final.txt
+      - KG_FILE_PATH=/app/kg_final.txt
+      - WATCH_PATH=/app/user-recommendation-service/
+    volumes:
+      - ./flask-service/app/models/comment-validation-service/distilbert_semantic_classifier:/app/models/comment-validation-service/distilbert_semantic_classifier
+      - ./flask-service/app/models/comment-validation-service/coral_comment_classifier:/app/models/comment-validation-service/coral_comment_classifier
+      - ./flask-service/app/models/comment-validation-service/bart-large-mnli:/app/models/comment-validation-service/bart-large-mnli
+      - ./user-recommendation-service/ratings_final.txt:/app/ratings_final.txt
+      - ./user-recommendation-service/kg_final.txt:/app/kg_final.txt
+      - ./flask-service/app/models/kgcn_model:/app/models/kgcn_model
+      - ./flask-service/app/models/coral-growth-monitor-service/coral_polyp_model3.pt:/app/models/coral-growth-monitor-service/coral_polyp_model3.pt
 
 networks:
   microservices-network:

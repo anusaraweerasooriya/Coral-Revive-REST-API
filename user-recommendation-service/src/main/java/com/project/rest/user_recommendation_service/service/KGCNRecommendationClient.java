@@ -15,7 +15,7 @@ public class KGCNRecommendationClient {
     @Autowired
     private RestTemplate restTemplate;
 
-    private static final String FLASK_SERVICE_URL = "http://127.0.0.1:5000/api/recommend";
+    private static final String FLASK_SERVICE_URL = "http://flask-server:5000/api/recommend";
 
     public List<Integer> getRecommendedItems(Integer userIndex, List<Integer> itemIndices) {
         // Create a request body with user index and item indices
