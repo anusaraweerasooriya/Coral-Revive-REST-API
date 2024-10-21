@@ -9,10 +9,12 @@ logging.basicConfig(level=logging.DEBUG)
 class CommentClassificationService:
     def __init__(self):
         try:
-            distilbert_dir = '/Users/seminipeiris/Desktop/Coral-Revive-REST-API/flask-service/app/models/comment-validation-service/distilbert_semantic_classifier'
-            bert_dir = '/Users/seminipeiris/Desktop/Coral-Revive-REST-API/flask-service/app/models/comment-validation-service/coral_comment_classifier'
-            bart_dir = '/Users/seminipeiris/Desktop/Coral-Revive-REST-API/flask-service/app/models/comment-validation-service/bart-large-mnli'
+            # Directly use the specified model paths
+            distilbert_dir = "/app/models/comment-validation-service/distilbert_semantic_classifier"
+            bert_dir = "/app/models/comment-validation-service/coral_comment_classifier"
+            bart_dir = "/app/models/comment-validation-service/bart-large-mnli"
 
+            # Check if directories exist, download models if necessary
             if not os.path.exists(distilbert_dir):
                 logging.error(f"DistilBERT directory not found: {distilbert_dir}")
             if not os.path.exists(bert_dir):
@@ -24,6 +26,7 @@ class CommentClassificationService:
                 bart_classifier.save_pretrained(bart_dir)
                 logging.info("BART model downloaded and saved successfully.")
 
+            # Load models and tokenizers
             self.distilbert_model = DistilBertForSequenceClassification.from_pretrained(distilbert_dir, use_safetensors=True)
             self.distilbert_tokenizer = DistilBertTokenizer.from_pretrained(distilbert_dir)
 
@@ -108,10 +111,8 @@ class CommentClassificationService:
             logging.error("An error occurred during classification.", exc_info=True)
             return "error"
 
-
-
 if __name__ == "__main__":
     service = CommentClassificationService()
     result = service.classify_comment("This is a sample post.", "This is a sample comment.")
     print("Classification result:", result)
-    print(f"Current working directory: {os.getcwd()}")
+

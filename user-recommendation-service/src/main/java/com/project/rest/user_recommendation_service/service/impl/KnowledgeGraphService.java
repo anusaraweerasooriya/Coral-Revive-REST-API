@@ -63,7 +63,7 @@ public class KnowledgeGraphService {
                     }
 
                     UserDTO userDTO = userAuthClient.getUserDetails(question.getUserId());
-                    writeRelations(writer, userDTO.getFollowing(), getUserId(userDTO.getId()), "follows");
+                    writeRelations(writer, userDTO.getFollowers(), getUserId(userDTO.getId()), "follows");
                 }
             }
 

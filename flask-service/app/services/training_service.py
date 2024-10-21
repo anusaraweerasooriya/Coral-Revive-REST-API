@@ -2,7 +2,10 @@ import os
 import tensorflow as tf
 from app.models.kgcn_model import KGCN, train, load_data
 
-MODEL_SAVE_PATH = '/Users/seminipeiris/Desktop/Coral-Revive-REST-API/flask-service/app/models/kgcn_model/model.ckpt'
+# Explicitly set the model save path and keep the other two paths as they are
+MODEL_SAVE_PATH = '/app/models/new_kgcn_model/model.ckpt'
+RATINGS_FILE_PATH = os.getenv('RATINGS_FILE_PATH', '/app/user-recommendation-service/ratings_final.txt')
+KG_FILE_PATH = os.getenv('KG_FILE_PATH', '/app/user-recommendation-service/kg_final.txt')
 
 class TrainingService:
     def __init__(self, model_save_path=MODEL_SAVE_PATH):
@@ -20,8 +23,8 @@ class TrainingService:
         self._close_session()
 
         args = self._get_args()
-        rating_file_path = os.path.join('/Users/seminipeiris/Desktop/Coral-Revive-REST-API/user-recommendation-service/', 'ratings_final.txt')
-        kg_file_path = os.path.join('/Users/seminipeiris/Desktop/Coral-Revive-REST-API/user-recommendation-service/', 'kg_final.txt')
+        rating_file_path = RATINGS_FILE_PATH
+        kg_file_path = KG_FILE_PATH
 
         data = load_data(args, rating_file_path, kg_file_path)
 

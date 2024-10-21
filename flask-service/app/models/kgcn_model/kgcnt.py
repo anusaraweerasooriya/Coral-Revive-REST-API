@@ -1,15 +1,13 @@
 import tensorflow as tf
 import numpy as np
 from sklearn.metrics import f1_score, roc_auc_score
-import shutil
-import tensorflow as tf
 from .kgcna import SumAggregator, NeighborAggregator, ConcatAggregator
 from .kgcnm import KGCN
 
-# Disable eager execution (TensorFlow 2.x default) to use the session-based execution model
-tf.compat.v1.disable_eager_execution()
-
 def train(args, data, show_loss, show_topk):
+    # Ensure eager execution is only disabled in this function
+    _disable_eager_execution()
+    
     graph = tf.Graph()  # Create a new graph
     with graph.as_default():
         n_user, n_item, n_entity, n_relation = data[0], data[1], data[2], data[3]
@@ -43,6 +41,11 @@ def train(args, data, show_loss, show_topk):
                     print('precision: ', '\t'.join([f'{p:.4f}' for p in precision]))
                     print('recall: ', '\t'.join([f'{r:.4f}' for r in recall]))
 
+def _disable_eager_execution():
+    if tf.executing_eagerly():
+        tf.compat.v1.disable_eager_execution()
+        print("Eager execution disabled for the training process")
+
 def topk_settings(show_topk, train_data, test_data, n_item):
     if show_topk:
         user_num = 100
@@ -57,13 +60,11 @@ def topk_settings(show_topk, train_data, test_data, n_item):
     else:
         return [None] * 5
 
-
 def get_feed_dict(model, data, start, end):
     feed_dict = {model.user_indices: data[start:end, 0],
                  model.item_indices: data[start:end, 1],
                  model.labels: data[start:end, 2]}
     return feed_dict
-
 
 def ctr_eval(sess, model, data, batch_size):
     start = 0
@@ -75,7 +76,6 @@ def ctr_eval(sess, model, data, batch_size):
         f1_list.append(f1)
         start += batch_size
     return float(np.mean(auc_list)), float(np.mean(f1_list))
-
 
 def topk_eval(sess, model, user_list, train_record, test_record, item_set, k_list, batch_size):
     precision_list = {k: [] for k in k_list}
@@ -113,7 +113,6 @@ def topk_eval(sess, model, user_list, train_record, test_record, item_set, k_lis
     recall = [np.mean(recall_list[k]) for k in k_list]
 
     return precision, recall
-
 
 def get_user_record(data, is_train):
     user_history_dict = dict()

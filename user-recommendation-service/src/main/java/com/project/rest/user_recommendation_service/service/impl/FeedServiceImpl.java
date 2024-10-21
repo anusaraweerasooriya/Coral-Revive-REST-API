@@ -115,7 +115,7 @@ public class FeedServiceImpl implements FeedService {
 
     private List<Integer> fetchRecommendationsFromFlask(Integer userIndex, List<Integer> itemIndices) {
         RestTemplate restTemplate = new RestTemplate();
-        String flaskUrl = "http://127.0.0.1:5000/api/recommend";
+        String flaskUrl = "http://flask-server:5000/api/recommend";
 
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("user_index", userIndex);
@@ -155,8 +155,8 @@ public class FeedServiceImpl implements FeedService {
         logger.info("Fetching recommended posts for user ID: {}", userId);
         
         // Load user and item mappings
-        String userMapFilePath = "/Users/seminipeiris/Desktop/Coral-Revive-REST-API/user-recommendation-service/user_mapping.json";
-        String itemMapFilePath = "/Users/seminipeiris/Desktop/Coral-Revive-REST-API/user-recommendation-service/item_mapping.json";
+        String userMapFilePath = System.getenv("USER_MAP_FILE_PATH");
+        String itemMapFilePath = System.getenv("ITEM_MAP_FILE_PATH");
     
         Map<String, Integer> userMap = loadMapping(userMapFilePath);
         Map<String, Integer> itemMap = loadMapping(itemMapFilePath);

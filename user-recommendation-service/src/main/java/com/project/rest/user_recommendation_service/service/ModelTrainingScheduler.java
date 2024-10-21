@@ -6,7 +6,7 @@ import org.springframework.web.client.RestTemplate;
 @Component
 public class ModelTrainingScheduler {
 
-    private static final String FLASK_API_URL = "http://127.0.0.1:5000/api/update/train-model";
+    private static final String FLASK_API_URL = "http://flask-server:5000/api/update/train-model";
 
     private final RestTemplate restTemplate;
 

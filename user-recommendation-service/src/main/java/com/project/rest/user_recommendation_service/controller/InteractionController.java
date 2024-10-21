@@ -20,26 +20,27 @@ public class InteractionController {
 
     @PostMapping("/generate-ratings")
     public ResponseEntity<String> generateRatingsFile() {
-    try {
-        String ratingsFilePath = "/Users/seminipeiris/Desktop/Coral-Revive-REST-API/user-recommendation-service/ratings_final.txt";
-        String userMapFilePath = "/Users/seminipeiris/Desktop/Coral-Revive-REST-API/user-recommendation-service/user_mapping.json";
-        String itemMapFilePath = "/Users/seminipeiris/Desktop/Coral-Revive-REST-API/user-recommendation-service/item_mapping.json";
+        try {
+            // Use environment variables for file paths
+            String ratingsFilePath = System.getenv("RATINGS_FILE_PATH");
+            String userMapFilePath = System.getenv("USER_MAP_FILE_PATH");
+            String itemMapFilePath = System.getenv("ITEM_MAP_FILE_PATH");
 
-        interactionDataService.generateRatingsFile(ratingsFilePath, userMapFilePath, itemMapFilePath);
+            interactionDataService.generateRatingsFile(ratingsFilePath, userMapFilePath, itemMapFilePath);
 
-        return ResponseEntity.ok("Ratings file generated successfully.");
-    } catch (Exception e) {
-        return ResponseEntity.status(500).body("Failed to generate ratings file: " + e.getMessage());
+            return ResponseEntity.ok("Ratings file generated successfully.");
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Failed to generate ratings file: " + e.getMessage());
+        }
     }
-    }
-
 
     @PostMapping("/generate-kg")
     public ResponseEntity<String> generateKgFile() {
         try {
-            String kgFilePath = "/Users/seminipeiris/Desktop/Coral-Revive-REST-API/user-recommendation-service/kg_final.txt";
-            String userMapFilePath = "/Users/seminipeiris/Desktop/Coral-Revive-REST-API/user-recommendation-service/user_mapping.json";
-            String postMapFilePath = "/Users/seminipeiris/Desktop/Coral-Revive-REST-API/user-recommendation-service/post_mapping.json";
+            // Use environment variables for file paths
+            String kgFilePath = System.getenv("KG_FILE_PATH");
+            String userMapFilePath = System.getenv("USER_MAP_FILE_PATH");
+            String postMapFilePath = System.getenv("POST_MAP_FILE_PATH");
             
             // Generate the knowledge graph file and mappings
             knowledgeGraphService.generateKgFile(kgFilePath, userMapFilePath, postMapFilePath);
@@ -49,5 +50,4 @@ public class InteractionController {
             return ResponseEntity.status(500).body("Failed to generate knowledge graph file: " + e.getMessage());
         }
     }
-
 }

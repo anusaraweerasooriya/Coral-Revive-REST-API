@@ -1,9 +1,9 @@
-from transformers import BartTokenizer, BartForSequenceClassification, pipeline
+from transformers import pipeline
 
 class PostClassificationService:
     def __init__(self):
-        
-        bart_dir = '/Users/seminipeiris/Desktop/Coral-Revive-REST-API/flask-service/app/models/comment-validation-service/bart-large-mnli'
+        # Use the specified BART model directory
+        bart_dir = "/app/models/comment-validation-service/bart-large-mnli"
         try:
             self.classifier = pipeline("zero-shot-classification", model=bart_dir)
             print(f"BART model loaded from: {bart_dir}")

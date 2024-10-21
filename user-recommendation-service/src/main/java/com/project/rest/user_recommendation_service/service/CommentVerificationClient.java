@@ -12,7 +12,7 @@ public class CommentVerificationClient {
     @Autowired
     private RestTemplate loadBalancedRestTemplate;
 
-    private static final String FLASK_SERVICE_URL = "http://127.0.0.1:5000/api/comment-verification/classify";
+    private static final String FLASK_SERVICE_URL = "http://flask-server:5000/api/comment-verification/classify";
 
     public String classifyComment(String postContent, String commentContent) {
 

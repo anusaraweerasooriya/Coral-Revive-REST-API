@@ -8,7 +8,7 @@ import os
 class CoralPolypCountService:
     def __init__(self):
 
-        model_path = 'A:/Research Project/Microservices Application/REST API/flask-service/app/models/coral-growth-monitor-service/coral_polyp_model3.pt'
+        model_path = '/app/models/coral-growth-monitor-service/coral_polyp_model3.pt'
         self.model = YOLO(model_path)
 
     def predict_polyp_count(self, img_path):

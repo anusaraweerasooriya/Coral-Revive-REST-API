@@ -3,7 +3,10 @@ import tensorflow as tf
 import numpy as np
 from app.models.kgcn_model import KGCN, load_data
 
-MODEL_SAVE_PATH = '/Users/seminipeiris/Desktop/Coral-Revive-REST-API/flask-service/app/models/kgcn_model/model.ckpt'
+# Specify the path for the model save path directly
+MODEL_SAVE_PATH = "/app/models/kgcn_model/model.ckpt"
+RATINGS_FILE_PATH = os.getenv("RATINGS_FILE_PATH", "/app/user-recommendation-service/ratings_final.txt")
+KG_FILE_PATH = os.getenv("KG_FILE_PATH", "/app/user-recommendation-service/kg_final.txt")
 
 class KGCNModelService:
     def __init__(self, model_save_path=MODEL_SAVE_PATH):
@@ -23,13 +26,21 @@ class KGCNModelService:
             self._initialize_model()
             
             saver = tf.compat.v1.train.Saver()
-            saver.restore(self.session, self.model_save_path)
+            
+            # Load the latest checkpoint if it exists
+            checkpoint_path = tf.train.latest_checkpoint(os.path.dirname(self.model_save_path))
+            if checkpoint_path:
+                saver.restore(self.session, checkpoint_path)
+                print(f"Model restored from {checkpoint_path}")
+            else:
+                print(f"No valid checkpoint found at {self.model_save_path}")
+                raise ValueError(f"The passed save_path is not a valid checkpoint: {self.model_save_path}")
 
     def _initialize_model(self):
         # Assuming args are needed for model initialization
         args = self._get_args()
-        rating_file_path = '/Users/seminipeiris/Desktop/Coral-Revive-REST-API/user-recommendation-service/ratings_final.txt'
-        kg_file_path = '/Users/seminipeiris/Desktop/Coral-Revive-REST-API/user-recommendation-service/kg_final.txt'
+        rating_file_path = RATINGS_FILE_PATH
+        kg_file_path = KG_FILE_PATH
 
         data = load_data(args, rating_file_path, kg_file_path)
 
@@ -41,11 +52,10 @@ class KGCNModelService:
             self.session.close()
             self.session = None
 
-    def validate_indices(self,indices, max_index):
+    def validate_indices(self, indices, max_index):
         invalid_indices = [i for i in indices if i >= max_index or i < 0]
         if invalid_indices:
             raise ValueError(f"Invalid indices found: {invalid_indices}")
-
 
     def recommend_posts(self, user_index, item_indices):
         if self.current_model is None:
