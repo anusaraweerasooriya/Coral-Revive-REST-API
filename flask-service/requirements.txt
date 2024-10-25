@@ -15,4 +15,4 @@ torch
 transformers
 opencv-python
 ultralytics
-
+boto3==1.28.0
