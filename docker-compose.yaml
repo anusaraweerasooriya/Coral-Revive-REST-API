@@ -117,9 +117,6 @@ services:
       - KG_FILE_PATH=/app/kg_final.txt
       - WATCH_PATH=/app/user-recommendation-service/
     volumes:
-      - ./flask-service/app/models/comment-validation-service/distilbert_semantic_classifier:/app/models/comment-validation-service/distilbert_semantic_classifier
-      - ./flask-service/app/models/comment-validation-service/coral_comment_classifier:/app/models/comment-validation-service/coral_comment_classifier
-      - ./flask-service/app/models/comment-validation-service/bart-large-mnli:/app/models/comment-validation-service/bart-large-mnli
       - ./user-recommendation-service/ratings_final.txt:/app/ratings_final.txt
       - ./user-recommendation-service/kg_final.txt:/app/kg_final.txt
       - ./flask-service/app/models/kgcn_model:/app/models/kgcn_model
