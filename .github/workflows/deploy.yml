@@ -96,4 +96,4 @@ jobs:
           zip -r deploy.zip docker-compose.yaml
           eb init -p docker ${{ secrets.EB_ENV_NAME }} --region ${{ secrets.AWS_REGION }}
           sleep 6  # Add a short delay to ensure application version registration
-          eb deploy ${{ secrets.EB_ENV_NAME }} --label app-version-$(date +%Y%m%d%H%M%S)
+          eb create ${{ secrets.EB_ENV_NAME }} --platform docker --region ${{ secrets.AWS_REGION }} --label app-version-$(date +%Y%m%d%H%M%S)
