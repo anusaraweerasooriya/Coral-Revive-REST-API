@@ -32,6 +32,8 @@ services:
       - "8002:8002"
     networks:
       - microservices-network
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://naming-server:8671/eureka
 
   user-recommendation-service:
     build:
