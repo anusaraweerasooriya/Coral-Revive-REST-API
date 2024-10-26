@@ -103,7 +103,7 @@ jobs:
               echo "Application version $VERSION_LABEL already exists. Proceeding with deployment."
             else
               echo "Creating new application version $VERSION_LABEL."
-              eb deploy ${{ secrets.EB_ENV_NAME }} --label "$VERSION_LABEL"
+              eb deploy ${{ secrets.EB_ENV_NAME }} --label "$VERSION_LABEL" --timeout 30
               sleep 30  # Give time for the version to register
             fi
           else
