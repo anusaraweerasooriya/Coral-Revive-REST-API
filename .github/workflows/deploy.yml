@@ -102,7 +102,7 @@ jobs:
           eb init -p docker ${{ secrets.APPLICATION_NAME }} --region ${{ secrets.AWS_REGION }}
           
           # Considerable delay to allow for initialization
-          sleep 20
+          sleep 60
 
           # Check if the environment exists, and deploy or create as needed
           if eb list | grep -q ${{ secrets.EB_ENV_NAME }}; then
@@ -110,5 +110,5 @@ jobs:
             eb deploy ${{ secrets.EB_ENV_NAME }} --label app-version-$(date +%Y%m%d%H%M%S)
           else
             echo "Environment does not exist. Creating new environment."
-            eb create ${{ secrets.EB_ENV_NAME }} --env-name ${{ secrets.EB_ENV_NAME }}
+            eb create ${{ secrets.EB_ENV_NAME }} --platform docker --region ${{ secrets.AWS_REGION }}
           fi
