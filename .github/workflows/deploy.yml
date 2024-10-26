@@ -97,28 +97,16 @@ jobs:
         run: |
           zip -r deploy.zip docker-compose.yaml
 
-      # Initialize Elastic Beanstalk Application
       - name: Initialize Elastic Beanstalk Application
         run: |
           eb init -p docker ${{ secrets.APPLICATION_NAME }} --region ${{ secrets.AWS_REGION }}
 
-       # Check if environment exists using `eb list`
-      - name: Check if Environment Exists
-        id: check_env
+      # Attempt deployment, and if it fails, create the environment
+      - name: Deploy to Elastic Beanstalk or Create Environment if Missing
         run: |
-          if eb list | grep -q "^${{ secrets.EB_ENV_NAME }}$"; then
-            echo "ENV_EXISTS=true" >> $GITHUB_ENV
+          if eb deploy ${{ secrets.EB_ENV_NAME }} --label app-version-$(date +%Y%m%d%H%M%S); then
+            echo "Deployment successful."
           else
-            echo "ENV_EXISTS=false" >> $GITHUB_ENV
-          fi
-
-      # Create or Deploy Environment Based on Existence
-      - name: Create or Deploy Elastic Beanstalk Environment
-        run: |
-          if [ "$ENV_EXISTS" = "true" ]; then
-            echo "Environment exists. Deploying."
-            eb deploy ${{ secrets.EB_ENV_NAME }} --label app-version-$(date +%Y%m%d%H%M%S)
-          else
-            echo "Environment does not exist. Creating new environment."
+            echo "Deployment failed. Creating environment..."
             eb create ${{ secrets.EB_ENV_NAME }} --platform docker --region ${{ secrets.AWS_REGION }}
           fi
