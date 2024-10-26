@@ -24,19 +24,19 @@ jobs:
         run: |
           aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
 
-       # Install the Elastic Beanstalk CLI
       - name: Install Elastic Beanstalk CLI
         run: |
           pip install --upgrade pip
           pip install awsebcli
-      
+
       # Build, tag, and push each service to ECR
       - name: Build and Push coral-growth-monitor
         run: |
           docker build -t coral-growth-monitor ./coral-growth-monitor-service
           docker tag coral-growth-monitor:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/coral-revive-rest-api-coral-growth-monitor:latest
           docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/coral-revive-rest-api-coral-growth-monitor:latest
-
+          
+      # Additional build and push steps for other services
       - name: Build and Push scheduling
         run: |
           docker build -t scheduling ./scheduling-service
@@ -79,10 +79,8 @@ jobs:
           docker tag flask-server:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/coral-revive-rest-api-flask-server:latest
           docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/coral-revive-rest-api-flask-server:latest
 
-      # Deploy docker-compose.yaml to Elastic Beanstalk
-      - name: Deploy to Elastic Beanstalk
+      - name: Replace ECR URLs in Docker Compose
         run: |
-          # Replace placeholders with ECR URLs in docker-compose.yaml
           sed -i "s|coral-growth-monitor|${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/coral-revive-rest-api-coral-growth-monitor:latest|g" docker-compose.yaml
           sed -i "s|scheduling|${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/coral-revive-rest-api-scheduling:latest|g" docker-compose.yaml
           sed -i "s|resource-allocation|${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/coral-revive-rest-api-resource-allocation:latest|g" docker-compose.yaml
@@ -92,20 +90,20 @@ jobs:
           sed -i "s|auth-service|${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/coral-revive-rest-api-auth-service:latest|g" docker-compose.yaml
           sed -i "s|flask-server|${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/coral-revive-rest-api-flask-server:latest|g" docker-compose.yaml
 
-      # Zip the application for deployment
       - name: Zip for Elastic Beanstalk Deployment
         run: |
           zip -r deploy.zip docker-compose.yaml
 
-      - name: Initialize Elastic Beanstalk Application and Environment
+      - name: Initialize Elastic Beanstalk Application
         run: |
           eb init -p docker ${{ secrets.APPLICATION_NAME }} --region ${{ secrets.AWS_REGION }}
-          
-          # Considerable delay to allow for initialization
-          sleep 60
 
+      - name: Deploy to Elastic Beanstalk
+        run: |
+          VERSION_LABEL="app-version-$(date +%Y%m%d%H%M%S)"
+          
           # Check if environment exists
-          if aws elasticbeanstalk describe-environments --environment-names ${{ secrets.EB_ENV_NAME }} --region ${{ secrets.AWS_REGION }} | grep -q '"Status":'; then
+          if aws elasticbeanstalk describe-environments --application-name ${{ secrets.APPLICATION_NAME }} --environment-names ${{ secrets.EB_ENV_NAME }} --region ${{ secrets.AWS_REGION }} | grep -q '"Status":'; then
             echo "Environment exists. Checking for application version."
 
             # Check if the application version already exists
@@ -113,14 +111,11 @@ jobs:
               echo "Application version $VERSION_LABEL already exists. Proceeding with deployment."
             else
               echo "Creating new application version $VERSION_LABEL."
-              eb create --version "$VERSION_LABEL"
-              sleep 30  # Give time for the version to register
+              eb deploy ${{ secrets.EB_ENV_NAME }} --version "$VERSION_LABEL"
+              sleep 30
             fi
-
-            # Deploy the existing or new version
-            eb deploy ${{ secrets.EB_ENV_NAME }} --version "$VERSION_LABEL"
 
           else
             echo "Environment does not exist. Creating new environment with version $VERSION_LABEL."
-            eb create ${{ secrets.EB_ENV_NAME }} --platform docker --region ${{ secrets.AWS_REGION }}
+            eb create ${{ secrets.EB_ENV_NAME }} --platform docker --region ${{ secrets.AWS_REGION }} --version "$VERSION_LABEL" --application-name ${{ secrets.APPLICATION_NAME }}
           fi
