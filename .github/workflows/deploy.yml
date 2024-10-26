@@ -104,23 +104,20 @@ jobs:
           # Considerable delay to allow for initialization
           sleep 60
 
-          # Check if the environment exists and deploy or create as needed
+          # Check if environment exists
           if aws elasticbeanstalk describe-environments --environment-names ${{ secrets.EB_ENV_NAME }} --region ${{ secrets.AWS_REGION }} | grep -q '"Status":'; then
-            echo "Environment exists. Proceeding with deploy."
+            echo "Environment exists. Checking for application version."
 
             # Check if the application version already exists
             if aws elasticbeanstalk describe-application-versions --application-name ${{ secrets.APPLICATION_NAME }} --region ${{ secrets.AWS_REGION }} --version-labels "$VERSION_LABEL" | grep -q '"VersionLabel":'; then
               echo "Application version $VERSION_LABEL already exists. Proceeding with deployment."
             else
               echo "Creating new application version $VERSION_LABEL."
-              eb create --label "$VERSION_LABEL"
-              sleep 30 
+              eb deploy ${{ secrets.EB_ENV_NAME }} --version "$VERSION_LABEL"
+              sleep 30  # Give time for the version to register
             fi
-
-            # Deploy the existing or new version
-            eb deploy ${{ secrets.EB_ENV_NAME }} --label "$VERSION_LABEL"
 
           else
             echo "Environment does not exist. Creating new environment with version $VERSION_LABEL."
-            eb create ${{ secrets.EB_ENV_NAME }} --platform docker --region ${{ secrets.AWS_REGION }} --label "$VERSION_LABEL"
+            eb create ${{ secrets.EB_ENV_NAME }} --platform docker --region ${{ secrets.AWS_REGION }}
           fi
