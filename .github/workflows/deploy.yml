@@ -92,14 +92,33 @@ jobs:
           sed -i "s|auth-service|${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/coral-revive-rest-api-auth-service:latest|g" docker-compose.yaml
           sed -i "s|flask-server|${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/coral-revive-rest-api-flask-server:latest|g" docker-compose.yaml
 
-      # Initialize and create the Elastic Beanstalk environment (first-time setup)
-      - name: Initialize and Create Elastic Beanstalk Environment
+      # Zip the application for deployment
+      - name: Zip for Elastic Beanstalk Deployment
+        run: |
+          zip -r deploy.zip docker-compose.yaml
+
+      # Initialize Elastic Beanstalk Application
+      - name: Initialize Elastic Beanstalk Application
         run: |
           eb init -p docker ${{ secrets.APPLICATION_NAME }} --region ${{ secrets.AWS_REGION }}
-          sleep 6  # Add a short delay to ensure application registration
-          eb create ${{ secrets.EB_ENV_NAME }} --platform docker --region ${{ secrets.AWS_REGION }}
 
-      # Deploy to Elastic Beanstalk (for subsequent deployments)
-      - name: Deploy to Elastic Beanstalk
+      # Check if the environment already exists
+      - name: Check Environment Existence
+        id: check_env
         run: |
-          eb deploy ${{ secrets.EB_ENV_NAME }} --label app-version-$(date +%Y%m%d%H%M%S)
+          if eb status ${{ secrets.EB_ENV_NAME }} > /dev/null 2>&1; then
+            echo "env_exists=true" >> $GITHUB_ENV
+          else
+            echo "env_exists=false" >> $GITHUB_ENV
+          fi
+
+      # Create or Deploy Environment Based on Existence
+      - name: Create or Deploy Elastic Beanstalk Environment
+        run: |
+          if [ "$env_exists" = "false" ]; then
+            # First-time setup
+            eb create ${{ secrets.EB_ENV_NAME }} --platform docker --region ${{ secrets.AWS_REGION }}
+          else
+            # Subsequent deployments
+            eb deploy ${{ secrets.EB_ENV_NAME }} --label app-version-$(date +%Y%m%d%H%M%S)
+          fi
