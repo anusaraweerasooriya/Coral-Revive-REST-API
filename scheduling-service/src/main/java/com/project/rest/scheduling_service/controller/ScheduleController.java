@@ -3,6 +3,8 @@ package com.project.rest.scheduling_service.controller;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import com.project.rest.scheduling_service.dto.ResourceEstimationRequest;
 import com.project.rest.scheduling_service.model.Schedule;
 import com.project.rest.scheduling_service.service.api.ScheduleService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,5 +55,13 @@ public class ScheduleController {
     public ResponseEntity<List<Schedule>> getPrioritizedSchedules() {
         List<Schedule> prioritizedSchedules = scheduleService.getPrioritizedSchedules();
         return new ResponseEntity<>(prioritizedSchedules, HttpStatus.OK);
+    }
+
+    @PatchMapping("/{scheduleId}/resource-estimation")
+    public ResponseEntity<Schedule> updateResourceEstimation(
+            @PathVariable String scheduleId,
+            @RequestBody ResourceEstimationRequest request) {
+        Schedule updatedSchedule = scheduleService.updateResourceEstimation(scheduleId, request);
+        return ResponseEntity.ok(updatedSchedule);
     }
 }
