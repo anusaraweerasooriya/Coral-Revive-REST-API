@@ -95,4 +95,5 @@ jobs:
           # Zip and deploy to Elastic Beanstalk
           zip -r deploy.zip docker-compose.yaml
           eb init -p docker ${{ secrets.EB_ENV_NAME }} --region ${{ secrets.AWS_REGION }}
-          eb deploy ${{ secrets.EB_ENV_NAME }}
+          sleep 6  # Add a short delay to ensure application version registration
+          eb deploy ${{ secrets.EB_ENV_NAME }} --label app-version-$(date +%Y%m%d%H%M%S)
