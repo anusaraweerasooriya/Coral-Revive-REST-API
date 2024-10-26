@@ -13,6 +13,9 @@ jobs:
       - name: Check out the code
         uses: actions/checkout@v2
 
+      - name: Set Version Label
+        run: echo "VERSION_LABEL=$(date +'%Y%m%d%H%M%S')" >> $GITHUB_ENV
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -23,64 +26,57 @@ jobs:
       - name: Log in to Amazon ECR
         run: |
           aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
-
+       # Install the Elastic Beanstalk CLI
       - name: Install Elastic Beanstalk CLI
         run: |
           pip install --upgrade pip
           pip install awsebcli
-
+      
       # Build, tag, and push each service to ECR
       - name: Build and Push coral-growth-monitor
         run: |
           docker build -t coral-growth-monitor ./coral-growth-monitor-service
           docker tag coral-growth-monitor:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/coral-revive-rest-api-coral-growth-monitor:latest
           docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/coral-revive-rest-api-coral-growth-monitor:latest
-          
-      # Additional build and push steps for other services
       - name: Build and Push scheduling
         run: |
           docker build -t scheduling ./scheduling-service
           docker tag scheduling:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/coral-revive-rest-api-scheduling:latest
           docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/coral-revive-rest-api-scheduling:latest
-
       - name: Build and Push resource-allocation
         run: |
           docker build -t resource-allocation ./resource-allocation-service
           docker tag resource-allocation:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/coral-revive-rest-api-resource-allocation:latest
           docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/coral-revive-rest-api-resource-allocation:latest
-
       - name: Build and Push user-recommendation-service
         run: |
           docker build -t user-recommendation-service ./user-recommendation-service
           docker tag user-recommendation-service:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/coral-revive-rest-api-user-recommendation-service:latest
           docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/coral-revive-rest-api-user-recommendation-service:latest
-
       - name: Build and Push naming-server
         run: |
           docker build -t naming-server ./naming-server
           docker tag naming-server:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/coral-revive-rest-api-naming-server:latest
           docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/coral-revive-rest-api-naming-server:latest
-
       - name: Build and Push api-gateway
         run: |
           docker build -t api-gateway ./api-gateway
           docker tag api-gateway:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/coral-revive-rest-api-api-gateway:latest
           docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/coral-revive-rest-api-api-gateway:latest
-
       - name: Build and Push auth-service
         run: |
           docker build -t auth-service ./auth-service
           docker tag auth-service:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/coral-revive-rest-api-auth-service:latest
           docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/coral-revive-rest-api-auth-service:latest
-
       - name: Build and Push flask-server
         run: |
           docker build -t flask-server ./flask-service
           docker tag flask-server:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/coral-revive-rest-api-flask-server:latest
           docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/coral-revive-rest-api-flask-server:latest
-
-      - name: Replace ECR URLs in Docker Compose
+      # Deploy docker-compose.yaml to Elastic Beanstalk
+      - name: Deploy to Elastic Beanstalk
         run: |
+          # Replace placeholders with ECR URLs in docker-compose.yaml
           sed -i "s|coral-growth-monitor|${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/coral-revive-rest-api-coral-growth-monitor:latest|g" docker-compose.yaml
           sed -i "s|scheduling|${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/coral-revive-rest-api-scheduling:latest|g" docker-compose.yaml
           sed -i "s|resource-allocation|${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/coral-revive-rest-api-resource-allocation:latest|g" docker-compose.yaml
@@ -89,33 +85,28 @@ jobs:
           sed -i "s|api-gateway|${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/coral-revive-rest-api-api-gateway:latest|g" docker-compose.yaml
           sed -i "s|auth-service|${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/coral-revive-rest-api-auth-service:latest|g" docker-compose.yaml
           sed -i "s|flask-server|${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/coral-revive-rest-api-flask-server:latest|g" docker-compose.yaml
-
+      # Zip the application for deployment
       - name: Zip for Elastic Beanstalk Deployment
         run: |
           zip -r deploy.zip docker-compose.yaml
-
-      - name: Initialize Elastic Beanstalk Application
+      - name: Initialize Elastic Beanstalk Application and Environment
         run: |
           eb init -p docker ${{ secrets.APPLICATION_NAME }} --region ${{ secrets.AWS_REGION }}
+          sleep 60
 
-      - name: Deploy to Elastic Beanstalk
-        run: |
-          VERSION_LABEL="app-version-$(date +%Y%m%d%H%M%S)"
-          
           # Check if environment exists
-          if aws elasticbeanstalk describe-environments --application-name ${{ secrets.APPLICATION_NAME }} --environment-names ${{ secrets.EB_ENV_NAME }} --region ${{ secrets.AWS_REGION }} | grep -q '"Status":'; then
+          if aws elasticbeanstalk describe-environments --environment-names ${{ secrets.EB_ENV_NAME }} --region ${{ secrets.AWS_REGION }} | grep -q '"Status":'; then
             echo "Environment exists. Checking for application version."
-
+            
             # Check if the application version already exists
             if aws elasticbeanstalk describe-application-versions --application-name ${{ secrets.APPLICATION_NAME }} --region ${{ secrets.AWS_REGION }} --version-labels "$VERSION_LABEL" | grep -q '"VersionLabel":'; then
               echo "Application version $VERSION_LABEL already exists. Proceeding with deployment."
             else
               echo "Creating new application version $VERSION_LABEL."
-              eb deploy ${{ secrets.EB_ENV_NAME }} --version "$VERSION_LABEL"
-              sleep 30
+              eb deploy ${{ secrets.EB_ENV_NAME }} --label "$VERSION_LABEL"
+              sleep 30  # Give time for the version to register
             fi
-
           else
             echo "Environment does not exist. Creating new environment with version $VERSION_LABEL."
-            eb create ${{ secrets.EB_ENV_NAME }} --platform docker --region ${{ secrets.AWS_REGION }} --version "$VERSION_LABEL" --application-name ${{ secrets.APPLICATION_NAME }}
+            eb create ${{ secrets.EB_ENV_NAME }} --platform docker --region ${{ secrets.AWS_REGION }}
           fi
