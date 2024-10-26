@@ -102,11 +102,11 @@ jobs:
         run: |
           eb init -p docker ${{ secrets.APPLICATION_NAME }} --region ${{ secrets.AWS_REGION }}
 
-      # Check if the environment already exists
+      # Check if the environment already exists using `eb list`
       - name: Check Environment Existence
         id: check_env
         run: |
-          if eb status ${{ secrets.EB_ENV_NAME }} > /dev/null 2>&1; then
+          if eb list | grep -q "^${{ secrets.EB_ENV_NAME }}$"; then
             echo "env_exists=true" >> $GITHUB_ENV
           else
             echo "env_exists=false" >> $GITHUB_ENV
