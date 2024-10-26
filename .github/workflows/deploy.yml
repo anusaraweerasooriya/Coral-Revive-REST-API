@@ -24,6 +24,12 @@ jobs:
         run: |
           aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
 
+       # Install the Elastic Beanstalk CLI
+      - name: Install Elastic Beanstalk CLI
+        run: |
+          pip install --upgrade pip
+          pip install awsebcli
+      
       # Build, tag, and push each service to ECR
       - name: Build and Push coral-growth-monitor
         run: |
