@@ -104,11 +104,11 @@ jobs:
           # Considerable delay to allow for initialization
           sleep 60
 
-          # Check if the environment exists, and deploy or create as needed
-          if eb list | grep -q ${{ secrets.EB_ENV_NAME }}; then
+          # Check if the environment exists and is ready
+          if eb status ${{ secrets.EB_ENV_NAME }}; then
             echo "Environment exists. Proceeding with deploy."
             eb deploy ${{ secrets.EB_ENV_NAME }} --label app-version-$(date +%Y%m%d%H%M%S)
           else
-            echo "Environment does not exist. Creating new environment."
+            echo "Environment does not exist or is not ready. Creating new environment."
             eb create ${{ secrets.EB_ENV_NAME }} --platform docker --region ${{ secrets.AWS_REGION }}
           fi
