@@ -100,24 +100,15 @@ jobs:
       - name: Initialize Elastic Beanstalk Application
         run: |
           eb init -p docker ${{ secrets.APPLICATION_NAME }} --region ${{ secrets.AWS_REGION }}
+          
+          # Considerable delay to allow for initialization
+          sleep 20
 
-     # Check if the environment exists
-      - name: Check Environment Existence
-        id: check_env
-        run: |
-          if eb list | grep -q "^${{ secrets.EB_ENV_NAME }}$"; then
-            echo "ENV_EXISTS=true" >> $GITHUB_ENV
+          # Check if the environment exists, and deploy or create as needed
+          if eb list | grep -q ${{ secrets.EB_ENV_NAME }}; then
+            echo "Environment exists. Proceeding with deploy."
+            eb deploy ${{ secrets.EB_ENV_NAME }} --label app-version-$(date +%Y%m%d%H%M%S)
           else
-            echo "ENV_EXISTS=false" >> $GITHUB_ENV
-          fi
-
-      # Create or Deploy Environment Based on Existence
-      - name: Create or Register Version in Elastic Beanstalk
-        run: |
-          if [ "$ENV_EXISTS" = "false" ]; then
-            # First-time setup with environment creation
-            eb create ${{ secrets.EB_ENV_NAME }} --platform docker --region ${{ secrets.AWS_REGION }}
-          else
-            # Register a new version and deploy
-            eb deploy ${{ secrets.EB_ENV_NAME }} --staged --label app-version-$(date +%Y%m%d%H%M%S)
+            echo "Environment does not exist. Creating new environment."
+            eb create ${{ secrets.EB_ENV_NAME }} --label app-version-$(date +%Y%m%d%H%M%S)
           fi
