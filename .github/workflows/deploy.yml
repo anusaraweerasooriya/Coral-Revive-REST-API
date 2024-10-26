@@ -1,0 +1,92 @@
+name: CI/CD Pipeline for AWS
+
+on:
+  push:
+    branches:
+      - main  # Trigger the workflow on pushes to the main branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@v2
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Log in to Amazon ECR
+        run: |
+          aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
+
+      # Build, tag, and push each service to ECR
+      - name: Build and Push coral-growth-monitor
+        run: |
+          docker build -t coral-growth-monitor ./coral-growth-monitor-service
+          docker tag coral-growth-monitor:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/coral-revive-rest-api-coral-growth-monitor:latest
+          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/coral-revive-rest-api-coral-growth-monitor:latest
+
+      - name: Build and Push scheduling
+        run: |
+          docker build -t scheduling ./scheduling-service
+          docker tag scheduling:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/coral-revive-rest-api-scheduling:latest
+          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/coral-revive-rest-api-scheduling:latest
+
+      - name: Build and Push resource-allocation
+        run: |
+          docker build -t resource-allocation ./resource-allocation-service
+          docker tag resource-allocation:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/coral-revive-rest-api-resource-allocation:latest
+          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/coral-revive-rest-api-resource-allocation:latest
+
+      - name: Build and Push user-recommendation-service
+        run: |
+          docker build -t user-recommendation-service ./user-recommendation-service
+          docker tag user-recommendation-service:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/coral-revive-rest-api-user-recommendation-service:latest
+          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/coral-revive-rest-api-user-recommendation-service:latest
+
+      - name: Build and Push naming-server
+        run: |
+          docker build -t naming-server ./naming-server
+          docker tag naming-server:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/coral-revive-rest-api-naming-server:latest
+          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/coral-revive-rest-api-naming-server:latest
+
+      - name: Build and Push api-gateway
+        run: |
+          docker build -t api-gateway ./api-gateway
+          docker tag api-gateway:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/coral-revive-rest-api-api-gateway:latest
+          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/coral-revive-rest-api-api-gateway:latest
+
+      - name: Build and Push auth-service
+        run: |
+          docker build -t auth-service ./auth-service
+          docker tag auth-service:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/coral-revive-rest-api-auth-service:latest
+          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/coral-revive-rest-api-auth-service:latest
+
+      - name: Build and Push flask-server
+        run: |
+          docker build -t flask-server ./flask-service
+          docker tag flask-server:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/coral-revive-rest-api-flask-server:latest
+          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/coral-revive-rest-api-flask-server:latest
+
+      # Deploy docker-compose.yml to Elastic Beanstalk
+      - name: Deploy to Elastic Beanstalk
+        run: |
+          # Replace placeholders with ECR URLs in docker-compose.yml
+          sed -i "s|coral-growth-monitor|${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/coral-revive-rest-api-coral-growth-monitor:latest|g" docker-compose.yml
+          sed -i "s|scheduling|${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/coral-revive-rest-api-scheduling:latest|g" docker-compose.yml
+          sed -i "s|resource-allocation|${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/coral-revive-rest-api-resource-allocation:latest|g" docker-compose.yml
+          sed -i "s|user-recommendation-service|${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/coral-revive-rest-api-user-recommendation-service:latest|g" docker-compose.yml
+          sed -i "s|naming-server|${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/coral-revive-rest-api-naming-server:latest|g" docker-compose.yml
+          sed -i "s|api-gateway|${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/coral-revive-rest-api-api-gateway:latest|g" docker-compose.yml
+          sed -i "s|auth-service|${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/coral-revive-rest-api-auth-service:latest|g" docker-compose.yml
+          sed -i "s|flask-server|${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/coral-revive-rest-api-flask-server:latest|g" docker-compose.yml
+
+          # Zip and deploy to Elastic Beanstalk
+          zip -r deploy.zip docker-compose.yml
+          eb init -p docker ${{ secrets.EB_ENV_NAME }} --region ${{ secrets.AWS_REGION }}
+          eb deploy ${{ secrets.EB_ENV_NAME }}
