@@ -22,6 +22,10 @@ services:
       - microservices-network
     environment:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://naming-server:8671/eureka
+      - SPRING_DATA_REDIS_HOST=redis
+      - SPRING_DATA_REDIS_PORT=637
+    depends_on:
+      - redis
 
   resource-allocation:
     build:
@@ -121,6 +125,14 @@ services:
       - ./user-recommendation-service/kg_final.txt:/app/kg_final.txt
       - ./flask-service/app/models/kgcn_model:/app/models/kgcn_model
       - ./flask-service/app/models/coral-growth-monitor-service/coral_polyp_model3.pt:/app/models/coral-growth-monitor-service/coral_polyp_model3.pt
+
+  redis:
+    image: redis:3.0.7
+    mem_limit: 100m
+    ports:
+      - "6379:6379"
+    networks:
+      - microservices-network
 
 networks:
   microservices-network:

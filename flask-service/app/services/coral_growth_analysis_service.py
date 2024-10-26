@@ -104,12 +104,15 @@ class CoralGrowthAnalysisService:
         polyp_count_service = CoralPolypCountService()
         polyp_count = polyp_count_service.predict_polyp_count(image_path)
 
-        area = self.calculate_area(image_path, polyp_count)
-        polyp_count = polyp_count * 3
-
+        # Retrieve previous growth history first
         previous_history = self.get_previous_growth_history(coral_id)
-        previous_polyp_count = previous_history.get("polypCount", 0)
         previous_area = previous_history.get("area", 0)
+
+        # Now you can call calculate_area with all required arguments
+        area = self.calculate_area(image_path, polyp_count, previous_area)
+
+        polyp_count = polyp_count * 3
+        previous_polyp_count = previous_history.get("polypCount", 0)
         previous_timestamp = previous_history.get("timestamp", datetime.now())
 
         growth_stage = self.get_growth_stage(species, polyp_count)
