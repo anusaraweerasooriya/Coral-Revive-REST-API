@@ -97,6 +97,12 @@ jobs:
         run: |
           zip -r deploy.zip docker-compose.yaml
 
+      - name: Install AWS CLI
+        run: |
+          curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+          unzip awscliv2.zip
+          sudo ./aws/install
+
       - name: Initialize Elastic Beanstalk Application and Environment
         run: |
           eb init -p docker ${{ secrets.APPLICATION_NAME }} --region ${{ secrets.AWS_REGION }}
@@ -105,7 +111,7 @@ jobs:
           sleep 60
 
           # Check if the environment exists and is ready
-          if eb list | grep -q "^${{ secrets.EB_ENV_NAME }}\$"; then
+          if aws elasticbeanstalk describe-environments --environment-names ${{ secrets.EB_ENV_NAME }} --region ${{ secrets.AWS_REGION }} | grep -q '"Status":'; then
             echo "Environment exists. Proceeding with deploy."
             eb deploy ${{ secrets.EB_ENV_NAME }} --label app-version-$(date +%Y%m%d%H%M%S)
           else
