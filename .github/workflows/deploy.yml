@@ -73,20 +73,20 @@ jobs:
           docker tag flask-server:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/coral-revive-rest-api-flask-server:latest
           docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/coral-revive-rest-api-flask-server:latest
 
-      # Deploy docker-compose.yml to Elastic Beanstalk
+      # Deploy docker-compose.yaml to Elastic Beanstalk
       - name: Deploy to Elastic Beanstalk
         run: |
-          # Replace placeholders with ECR URLs in docker-compose.yml
-          sed -i "s|coral-growth-monitor|${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/coral-revive-rest-api-coral-growth-monitor:latest|g" docker-compose.yml
-          sed -i "s|scheduling|${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/coral-revive-rest-api-scheduling:latest|g" docker-compose.yml
-          sed -i "s|resource-allocation|${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/coral-revive-rest-api-resource-allocation:latest|g" docker-compose.yml
-          sed -i "s|user-recommendation-service|${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/coral-revive-rest-api-user-recommendation-service:latest|g" docker-compose.yml
-          sed -i "s|naming-server|${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/coral-revive-rest-api-naming-server:latest|g" docker-compose.yml
-          sed -i "s|api-gateway|${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/coral-revive-rest-api-api-gateway:latest|g" docker-compose.yml
-          sed -i "s|auth-service|${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/coral-revive-rest-api-auth-service:latest|g" docker-compose.yml
-          sed -i "s|flask-server|${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/coral-revive-rest-api-flask-server:latest|g" docker-compose.yml
+          # Replace placeholders with ECR URLs in docker-compose.yaml
+          sed -i "s|coral-growth-monitor|${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/coral-revive-rest-api-coral-growth-monitor:latest|g" docker-compose.yaml
+          sed -i "s|scheduling|${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/coral-revive-rest-api-scheduling:latest|g" docker-compose.yaml
+          sed -i "s|resource-allocation|${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/coral-revive-rest-api-resource-allocation:latest|g" docker-compose.yaml
+          sed -i "s|user-recommendation-service|${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/coral-revive-rest-api-user-recommendation-service:latest|g" docker-compose.yaml
+          sed -i "s|naming-server|${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/coral-revive-rest-api-naming-server:latest|g" docker-compose.yaml
+          sed -i "s|api-gateway|${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/coral-revive-rest-api-api-gateway:latest|g" docker-compose.yaml
+          sed -i "s|auth-service|${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/coral-revive-rest-api-auth-service:latest|g" docker-compose.yaml
+          sed -i "s|flask-server|${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/coral-revive-rest-api-flask-server:latest|g" docker-compose.yaml
 
           # Zip and deploy to Elastic Beanstalk
-          zip -r deploy.zip docker-compose.yml
+          zip -r deploy.zip docker-compose.yaml
           eb init -p docker ${{ secrets.EB_ENV_NAME }} --region ${{ secrets.AWS_REGION }}
           eb deploy ${{ secrets.EB_ENV_NAME }}
