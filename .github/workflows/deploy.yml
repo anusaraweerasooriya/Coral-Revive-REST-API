@@ -92,8 +92,14 @@ jobs:
           sed -i "s|auth-service|${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/coral-revive-rest-api-auth-service:latest|g" docker-compose.yaml
           sed -i "s|flask-server|${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/coral-revive-rest-api-flask-server:latest|g" docker-compose.yaml
 
-          # Zip and deploy to Elastic Beanstalk
-          zip -r deploy.zip docker-compose.yaml
-          eb init -p docker ${{ secrets.EB_ENV_NAME }} --region ${{ secrets.AWS_REGION }}
-          sleep 6  # Add a short delay to ensure application version registration
-          eb create ${{ secrets.EB_ENV_NAME }} --platform docker --region ${{ secrets.AWS_REGION }} --label app-version-$(date +%Y%m%d%H%M%S)
+      # Initialize and create the Elastic Beanstalk environment (first-time setup)
+      - name: Initialize and Create Elastic Beanstalk Environment
+        run: |
+          eb init -p docker ${{ secrets.APPLICATION_NAME }} --region ${{ secrets.AWS_REGION }}
+          sleep 6  # Add a short delay to ensure application registration
+          eb create ${{ secrets.EB_ENV_NAME }} --platform docker --region ${{ secrets.AWS_REGION }}
+
+      # Deploy to Elastic Beanstalk (for subsequent deployments)
+      - name: Deploy to Elastic Beanstalk
+        run: |
+          eb deploy ${{ secrets.EB_ENV_NAME }} --label app-version-$(date +%Y%m%d%H%M%S)
