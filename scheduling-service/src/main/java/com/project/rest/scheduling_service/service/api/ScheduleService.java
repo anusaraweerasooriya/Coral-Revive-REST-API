@@ -1,4 +1,5 @@
 package com.project.rest.scheduling_service.service.api;
+import com.project.rest.scheduling_service.dto.ResourceEstimationRequest;
 import com.project.rest.scheduling_service.model.Schedule;
 
 import java.util.List;
@@ -11,4 +12,5 @@ public interface ScheduleService {
     List<Schedule> getPrioritizedSchedules();
 
     long countSchedulesByStatus(Schedule.Status status);
+    Schedule updateResourceEstimation(String scheduleId, ResourceEstimationRequest request);
 }

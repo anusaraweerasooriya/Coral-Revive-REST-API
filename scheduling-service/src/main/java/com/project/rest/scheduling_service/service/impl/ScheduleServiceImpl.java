@@ -1,5 +1,6 @@
 package com.project.rest.scheduling_service.service.impl;
 
+import com.project.rest.scheduling_service.dto.ResourceEstimationRequest;
 import com.project.rest.scheduling_service.model.Schedule;
 import com.project.rest.scheduling_service.repository.ScheduleRepository;
 import com.project.rest.scheduling_service.service.api.ScheduleService;
@@ -119,4 +120,58 @@ public class ScheduleServiceImpl implements ScheduleService {
     
         return prioritizedSchedules;
     }
+
+    @Override
+    public Schedule updateResourceEstimation(String scheduleId, ResourceEstimationRequest request) {
+        Optional<Schedule> optionalSchedule = scheduleRepository.findById(scheduleId);
+
+        if (optionalSchedule.isPresent()) {
+            Schedule schedule = optionalSchedule.get();
+
+            // Update resource estimation fields
+            schedule.setArea(request.getArea());
+            schedule.setDepth(request.getDepth());
+            schedule.setWaterCurrent(request.getWaterCurrent());
+            schedule.setTemperature(request.getTemperature());
+            schedule.setNumberOfReefBeds(request.getNumberOfReefBeds());
+            schedule.setManpowerRequired(request.getManpowerRequired());
+            schedule.setNumberOfReefSegments(request.getNumberOfReefSegments());
+            schedule.setNumberOfBoats(request.getNumberOfBoats());
+            schedule.setNumberOfDivingKits(request.getNumberOfDivingKits());
+            schedule.setAmountOfBoundingGlue(request.getAmountOfBoundingGlue());
+            schedule.setManpowerBoatOperation(request.getManpowerBoatOperation());
+            schedule.setManpowerCarryingReefBowls(request.getManpowerCarryingReefBowls());
+            schedule.setManpowerPlantingCorals(request.getManpowerPlantingCorals());
+            schedule.setManpowerSitePreparation(request.getManpowerSitePreparation());
+
+            // Convert LaborDTOs to Schedule.Labor and set them
+            List<Schedule.Labor> laborList = request.getLabors().stream().map(dto -> {
+                Schedule.Labor labor = new Schedule.Labor();
+                labor.setName(dto.getName());
+                labor.setWeight(dto.getWeight());
+                labor.setBmi(dto.getBmi());
+                labor.setHeight(dto.getHeight());
+                labor.setStrength(dto.getStrength());
+                labor.setBreathingCapacity(dto.getBreathingCapacity());
+                labor.setExperiences(dto.getExperiences());
+                labor.setSkills(dto.getSkills());
+                labor.setTask(dto.getTask());
+                labor.setOxygenCapacity(dto.getOxygenCapacity());
+                return labor;
+            }).collect(Collectors.toList());
+
+            schedule.setLabors(laborList);
+
+            // Update the status to Pending_Date_Schedule
+            schedule.setStatus(Schedule.Status.Pending_Date_Schedule);
+
+            // Set the last updated time
+            schedule.setLastUpdated(new Date());
+
+            return scheduleRepository.save(schedule);
+        } else {
+            throw new RuntimeException("Schedule not found with id: " + scheduleId);
+        }
+    }
 }
+
