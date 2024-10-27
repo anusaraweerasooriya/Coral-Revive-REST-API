@@ -1,5 +1,7 @@
 package com.project.rest.scheduling_service.service.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.project.rest.scheduling_service.dto.CurrentWeatherRequestDTO;
 import com.project.rest.scheduling_service.dto.WeatherResponseDTO;
 import com.project.rest.scheduling_service.dto.FlaskWeatherRequestDTO;
@@ -11,6 +13,7 @@ import com.project.rest.scheduling_service.service.api.WeatherService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -21,6 +24,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.io.InputStream;
 
 @Service
 public class WeatherServiceImpl implements WeatherService {
@@ -42,7 +46,6 @@ public class WeatherServiceImpl implements WeatherService {
     public List<SuitableDateDTO> getSuitableDatesForDiving() {
         List<SuitableDateDTO> suitableDates = (List<SuitableDateDTO>) redisTemplate.opsForValue().get(SUITABLE_DATES_KEY);
         
-        // Check if the data is available in Redis
         if (suitableDates != null) {
             // Check if the current date + 10 days is within the 30-day data
             LocalDate currentDate = LocalDate.now();
@@ -53,8 +56,21 @@ public class WeatherServiceImpl implements WeatherService {
                 return suitableDates;
             }
 
-            // If not valid, clear the existing cache
             redisTemplate.delete(SUITABLE_DATES_KEY);
+        } else if (suitableDates == null) {
+            // Return content of weather-mapping.json file
+            try {
+                ClassPathResource resource = new ClassPathResource("weather-mapping.json");
+                InputStream inputStream = resource.getInputStream();
+
+                // Parse JSON content
+                ObjectMapper objectMapper = new ObjectMapper();
+                List<SuitableDateDTO> weatherMapping = objectMapper.readValue(inputStream, new TypeReference<List<SuitableDateDTO>>() {});
+
+                return weatherMapping;
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
 
         // Generate new data if Redis cache is empty or outdated
@@ -216,6 +232,10 @@ public class WeatherServiceImpl implements WeatherService {
     
         // Classify as suitable if at least 4 of the conditions are met
         return suitableCount >= 4 ? "Suitable for diving." : "Not suitable for diving.";
+    }
+
+    public void clearSuitableDatesCache() {
+        redisTemplate.delete(SUITABLE_DATES_KEY);
     }
 
     
