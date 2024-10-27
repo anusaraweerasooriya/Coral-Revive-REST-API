@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   coral-growth-monitor:
     build:
@@ -23,7 +21,7 @@ services:
     environment:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://naming-server:8671/eureka
       - SPRING_DATA_REDIS_HOST=redis
-      - SPRING_DATA_REDIS_PORT=637
+      - SPRING_DATA_REDIS_PORT=6379
     depends_on:
       - redis
 
