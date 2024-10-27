@@ -15,4 +15,5 @@ public interface WeatherService {
 
     //WeatherService(RedisTemplate<String, Object> redisTemplate);
     List<SuitableDateDTO> getSuitableDatesForDiving();
+    void clearSuitableDatesCache();
 }

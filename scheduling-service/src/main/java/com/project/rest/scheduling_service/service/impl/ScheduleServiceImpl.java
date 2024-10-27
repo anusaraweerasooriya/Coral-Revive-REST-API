@@ -1,6 +1,7 @@
 package com.project.rest.scheduling_service.service.impl;
 
 import com.project.rest.scheduling_service.dto.ResourceEstimationRequest;
+import com.project.rest.scheduling_service.dto.ScheduledProjectForDiverDTO;
 import com.project.rest.scheduling_service.model.Schedule;
 import com.project.rest.scheduling_service.repository.ScheduleRepository;
 import com.project.rest.scheduling_service.service.api.ScheduleService;
@@ -8,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.data.domain.Sort;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -42,20 +44,6 @@ public class ScheduleServiceImpl implements ScheduleService {
             Schedule schedule = optionalSchedule.get();
             schedule.setScheduledDate(Date.from(scheduledDate.toInstant()));
             schedule.setStatus(Schedule.Status.Scheduled);
-            schedule.setLastUpdated(Date.from(ZonedDateTime.now().toInstant())); 
-            return scheduleRepository.save(schedule);
-        } else {
-            throw new RuntimeException("Schedule not found with id: " + scheduleId);
-        }
-    }
-
-    @Override
-    public Schedule updateResourceAvailability(String scheduleId) {
-        Optional<Schedule> optionalSchedule = scheduleRepository.findById(scheduleId);
-
-        if (optionalSchedule.isPresent()) {
-            Schedule schedule = optionalSchedule.get();
-            schedule.setStatus(Schedule.Status.Pending_Date_Schedule);
             schedule.setLastUpdated(Date.from(ZonedDateTime.now().toInstant())); 
             return scheduleRepository.save(schedule);
         } else {
@@ -172,6 +160,11 @@ public class ScheduleServiceImpl implements ScheduleService {
         } else {
             throw new RuntimeException("Schedule not found with id: " + scheduleId);
         }
+    }
+
+    @Override
+    public List<ScheduledProjectForDiverDTO> getScheduledProjectsForDiver() {
+        return scheduleRepository.findByStatus(Schedule.Status.Scheduled, Sort.by(Sort.Direction.ASC, "scheduledDate"));
     }
 }
 

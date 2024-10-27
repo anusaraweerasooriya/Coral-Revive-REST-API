@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.project.rest.scheduling_service.dto.ResourceEstimationRequest;
+import com.project.rest.scheduling_service.dto.ScheduledProjectForDiverDTO;
 import com.project.rest.scheduling_service.model.Schedule;
 import com.project.rest.scheduling_service.service.api.ScheduleService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,12 +34,6 @@ public class ScheduleController {
         return new ResponseEntity<>(updatedSchedule, HttpStatus.OK);
     }
 
-    @PatchMapping("{scheduleId}/setResourceAvailability")
-    public ResponseEntity<Schedule> updateResourceAvailability(@PathVariable String scheduleId) {
-        Schedule updatedSchedule = scheduleService.updateResourceAvailability(scheduleId);
-        return new ResponseEntity<>(updatedSchedule, HttpStatus.OK);
-    }
-
     @GetMapping("/count/scheduled")
     public ResponseEntity<Long> countScheduled() {
         long count = scheduleService.countSchedulesByStatus(Schedule.Status.Scheduled);
@@ -63,5 +58,11 @@ public class ScheduleController {
             @RequestBody ResourceEstimationRequest request) {
         Schedule updatedSchedule = scheduleService.updateResourceEstimation(scheduleId, request);
         return ResponseEntity.ok(updatedSchedule);
+    }
+
+    @GetMapping("/scheduled-for-diver")
+    public ResponseEntity<List<ScheduledProjectForDiverDTO>> getScheduledProjectsForDiver() {
+        List<ScheduledProjectForDiverDTO> schedules = scheduleService.getScheduledProjectsForDiver();
+        return ResponseEntity.ok(schedules);
     }
 }
