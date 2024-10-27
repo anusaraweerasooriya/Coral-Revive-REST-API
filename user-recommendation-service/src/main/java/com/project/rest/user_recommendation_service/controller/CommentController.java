@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
 
 
 @RestController
-@RequestMapping("/comments")
+@RequestMapping("user-recommendation-service/comments")
 public class CommentController {
 
     @Autowired

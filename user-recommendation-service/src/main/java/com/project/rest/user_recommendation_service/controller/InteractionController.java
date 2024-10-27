@@ -9,7 +9,7 @@ import com.project.rest.user_recommendation_service.service.impl.InteractionData
 import com.project.rest.user_recommendation_service.service.impl.KnowledgeGraphService; 
 
 @RestController
-@RequestMapping("/interactions")
+@RequestMapping("user-recommendation-service/interactions")
 public class InteractionController {
 
     @Autowired

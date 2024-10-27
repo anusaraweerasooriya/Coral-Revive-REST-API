@@ -5,7 +5,7 @@ from flask import Blueprint, request, jsonify
 comment_classifier_bp = Blueprint('comment_classifier', __name__)
 
 # URL of your Modelbit classifier
-MODELBIT_URL = "https://seminihiranya.us-east-1.aws.modelbit.com/v1/classifier_function/10"
+MODELBIT_URL = "https://seminihiranya.us-east-1.aws.modelbit.com/v1/classifier_function/14"
 
 @comment_classifier_bp.route('/classify', methods=['POST'])
 def classify():

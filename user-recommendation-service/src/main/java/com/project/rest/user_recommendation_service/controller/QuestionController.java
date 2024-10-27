@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/questions")
+@RequestMapping("user-recommendation-service/questions")
 public class QuestionController {
 
     @Autowired

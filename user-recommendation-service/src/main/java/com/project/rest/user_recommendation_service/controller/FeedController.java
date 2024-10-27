@@ -9,7 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/feed")
+@RequestMapping("user-recommendation-service/feed")
 public class FeedController {
 
     @Autowired
