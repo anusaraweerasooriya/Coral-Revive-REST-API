@@ -8,6 +8,8 @@ services:
       - "8000:8000"
     networks:
       - microservices-network
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://naming-server:8671/eureka
 
   scheduling:
     build:
