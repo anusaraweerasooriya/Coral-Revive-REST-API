@@ -13,15 +13,27 @@ def load_data(args,rating_file_path, kg_file_path):
 
 def load_rating(args, rating_file_path):
     print('Reading rating file...')
-
     rating_np = np.loadtxt(rating_file_path, dtype=np.int64)
     print("Loaded rating data:")
     print(rating_np)
-    n_user = len(set(rating_np[:, 0]))
-    n_item = len(set(rating_np[:, 1]))
+    
+    n_user = rating_np[:, 0].max() + 1  
+    n_item = rating_np[:, 1].max() + 1  
     train_data, eval_data, test_data = dataset_split(rating_np, args)
 
     return n_user, n_item, train_data, eval_data, test_data
+
+def load_kg(args, kg_file_path):
+    print('Reading KG file...')
+    kg_np = np.loadtxt(kg_file_path, dtype=np.int64)
+    
+    n_entity = max(kg_np[:, 0].max(), kg_np[:, 2].max()) + 1 
+    n_relation = kg_np[:, 1].max() + 1  
+
+    kg = construct_kg(kg_np)
+    adj_entity, adj_relation = construct_adj(args, kg, n_entity)
+
+    return n_entity, n_relation, adj_entity, adj_relation
 
 
 def dataset_split(rating_np, args):
@@ -43,21 +55,6 @@ def dataset_split(rating_np, args):
     test_data = rating_np[test_indices]
 
     return train_data, eval_data, test_data
-
-
-def load_kg(args, kg_file_path):
-    print('Reading KG file...')
-
-    
-    kg_np = np.loadtxt(kg_file_path, dtype=np.int64)
-
-    n_entity = len(set(kg_np[:, 0]) | set(kg_np[:, 2]))
-    n_relation = len(set(kg_np[:, 1]))
-
-    kg = construct_kg(kg_np)
-    adj_entity, adj_relation = construct_adj(args, kg, n_entity)
-
-    return n_entity, n_relation, adj_entity, adj_relation
 
 
 def construct_kg(kg_np):

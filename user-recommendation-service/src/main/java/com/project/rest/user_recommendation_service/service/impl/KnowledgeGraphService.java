@@ -29,7 +29,6 @@ public class KnowledgeGraphService {
     @Autowired
     private UserAuthClient userAuthClient;
 
-    // Define the mapping of relations to indices
     private static final Map<String, Integer> relationMapping = new HashMap<>();
     private static Map<String, Integer> userMapping = new ConcurrentHashMap<>();
     private static Map<String, Integer> postMapping = new ConcurrentHashMap<>();
@@ -42,10 +41,13 @@ public class KnowledgeGraphService {
         relationMapping.put("shares", 2);
         relationMapping.put("original_posted", 3);
         relationMapping.put("follows", 4);
-        relationMapping.put("commented", 5); // New relation for comments
+        relationMapping.put("commented", 5); 
     }
 
     public void generateKgFile(String kgFilePath, String userMapFilePath, String postMapFilePath) {
+        // Use a set to track unique entries
+        Set<String> uniqueRelations = new HashSet<>();
+
         try {
             loadMappings(userMapFilePath, postMapFilePath);
 
@@ -53,17 +55,20 @@ public class KnowledgeGraphService {
                 List<Question> questions = questionRepository.findAll();
                 for (Question question : questions) {
                     String questionId = getPostId(question.getId());
-                    writeRelations(writer, question.getLikedBy(), questionId, "likes");
-                    writeRelations(writer, question.getDislikedBy(), questionId, "dislikes");
-                    writeRelations(writer, question.getSharedBy(), questionId, "shares");
-                    writeRelations(writer, question.getComments(), questionId, "commented");
+                    writeRelations(writer, question.getLikedBy(), questionId, "likes", uniqueRelations);
+                    writeRelations(writer, question.getDislikedBy(), questionId, "dislikes", uniqueRelations);
+                    writeRelations(writer, question.getSharedBy(), questionId, "shares", uniqueRelations);
+                    writeRelations(writer, question.getComments(), questionId, "commented", uniqueRelations);
                     if (question.getOriginalUserId() != null) {
                         String originalUserId = getUserId(question.getOriginalUserId());
-                        writer.write(originalUserId + "\t" + relationMapping.get("original_posted") + "\t" + questionId + "\n");
+                        String relation = originalUserId + "\t" + relationMapping.get("original_posted") + "\t" + questionId;
+                        if (uniqueRelations.add(relation)) {
+                            writer.write(relation + "\n");
+                        }
                     }
 
                     UserDTO userDTO = userAuthClient.getUserDetails(question.getUserId());
-                    writeRelations(writer, userDTO.getFollowers(), getUserId(userDTO.getId()), "follows");
+                    writeRelations(writer, userDTO.getFollowers(), getUserId(userDTO.getId()), "follows", uniqueRelations);
                 }
             }
 
@@ -74,17 +79,23 @@ public class KnowledgeGraphService {
         }
     }
 
-    private void writeRelations(BufferedWriter writer, Set<String> users, String entityId, String relation) throws IOException {
+    private void writeRelations(BufferedWriter writer, Set<String> users, String entityId, String relation, Set<String> uniqueRelations) throws IOException {
         int relationIndex = relationMapping.get(relation);
         for (String userId : users) {
-            writer.write(getUserId(userId) + "\t" + relationIndex + "\t" + entityId + "\n");
+            String relationEntry = getUserId(userId) + "\t" + relationIndex + "\t" + entityId;
+            if (uniqueRelations.add(relationEntry)) { // Only write if the entry is unique
+                writer.write(relationEntry + "\n");
+            }
         }
     }
 
-    private void writeRelations(BufferedWriter writer, List<String> following, String userId, String relation) throws IOException {
+    private void writeRelations(BufferedWriter writer, List<String> following, String userId, String relation, Set<String> uniqueRelations) throws IOException {
         int relationIndex = relationMapping.get(relation);
         for (String followedUserId : following) {
-            writer.write(getUserId(userId) + "\t" + relationIndex + "\t" + getUserId(followedUserId) + "\n");
+            String relationEntry = getUserId(userId) + "\t" + relationIndex + "\t" + getUserId(followedUserId);
+            if (uniqueRelations.add(relationEntry)) { // Only write if the entry is unique
+                writer.write(relationEntry + "\n");
+            }
         }
     }
 

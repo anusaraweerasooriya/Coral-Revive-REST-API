@@ -1,11 +1,13 @@
 import tensorflow as tf
 import numpy as np
+import logging
 from sklearn.metrics import f1_score, roc_auc_score
 from .kgcna import SumAggregator, NeighborAggregator, ConcatAggregator
 
+logging.basicConfig(level=logging.INFO)
+
 class KGCN:
     def __init__(self, args, n_user, n_entity, n_relation, adj_entity, adj_relation):
-        # Disable eager execution only within this class
         self._disable_eager_execution()
         self._parse_args(args, adj_entity, adj_relation)
         self._build_inputs()
@@ -16,7 +18,7 @@ class KGCN:
         if not tf.executing_eagerly():
             return
         tf.compat.v1.disable_eager_execution()
-        print("Eager execution disabled for KGCN")
+        logging.info("Eager execution disabled for KGCN")
 
     @staticmethod
     def get_initializer():
@@ -55,6 +57,10 @@ class KGCN:
             self.relation_emb_matrix = tf.compat.v1.get_variable(
                 name='relation_emb_matrix', shape=[n_relation, self.dim], initializer=KGCN.get_initializer())
 
+            logging.info(f"user_emb_matrix shape: {self.user_emb_matrix.shape}")
+            logging.info(f"entity_emb_matrix shape: {self.entity_emb_matrix.shape}")
+            logging.info(f"relation_emb_matrix shape: {self.relation_emb_matrix.shape}")
+
             self.user_embeddings = tf.nn.embedding_lookup(self.user_emb_matrix, self.user_indices)
 
             entities, relations = self.get_neighbors(self.item_indices)
@@ -71,6 +77,7 @@ class KGCN:
         for i in range(self.n_iter):
             neighbor_entities = tf.reshape(tf.gather(self.adj_entity, entities[i]), [self.batch_size, -1])
             neighbor_relations = tf.reshape(tf.gather(self.adj_relation, entities[i]), [self.batch_size, -1])
+            logging.info(f"Neighbors for iteration {i}: {neighbor_entities}, {neighbor_relations}")
             entities.append(neighbor_entities)
             relations.append(neighbor_relations)
         return entities, relations
@@ -94,6 +101,7 @@ class KGCN:
                                     neighbor_vectors=tf.reshape(entity_vectors[hop + 1], shape),
                                     neighbor_relations=tf.reshape(relation_vectors[hop], shape),
                                     user_embeddings=self.user_embeddings)
+                logging.info(f"Aggregate - Iteration {i}, Hop {hop} - shape: {vector.shape}")
                 entity_vectors_next_iter.append(vector)
             entity_vectors = entity_vectors_next_iter
 

@@ -113,14 +113,13 @@ public class FeedServiceImpl implements FeedService {
         return new Feed(userId, feedPosts);
     }
 
-    private List<Integer> fetchRecommendationsFromFlask(Integer userIndex, List<Integer> itemIndices) {
+    private List<Integer> fetchRecommendationsFromFlask(Integer userIndex) {  // Remove itemIndices parameter
         RestTemplate restTemplate = new RestTemplate();
         String flaskUrl = "http://flask-server:5000/api/recommend";
-
+    
         Map<String, Object> requestBody = new HashMap<>();
-        requestBody.put("user_index", userIndex);
-        requestBody.put("item_indices", itemIndices);
-
+        requestBody.put("user_index", userIndex);  // Only include user_index
+    
         try {
             ResponseEntity<Map<String, Object>> response = restTemplate.postForEntity(flaskUrl, requestBody, (Class<Map<String, Object>>)(Class<?>)Map.class);
             if (response.getStatusCode() == HttpStatus.OK) {
@@ -132,10 +131,10 @@ public class FeedServiceImpl implements FeedService {
         } catch (Exception e) {
             logger.error("Error fetching recommendations from Flask service", e);
         }
-
+    
         return new ArrayList<>();
     }
-
+    
     // Fetch the followed user IDs from the user-auth service
     private List<String> getFollowedUserIds(String userId) {
         logger.info("Fetching followed user IDs for user ID: {}", userId);
@@ -167,8 +166,7 @@ public class FeedServiceImpl implements FeedService {
             return new ArrayList<>();
         }
     
-        List<Integer> itemIndices = new ArrayList<>(itemMap.values());
-        List<Integer> recommendedItemIndices = fetchRecommendationsFromFlask(userIndex, itemIndices);
+        List<Integer> recommendedItemIndices = fetchRecommendationsFromFlask(userIndex);
     
         if (recommendedItemIndices.isEmpty()) {
             logger.warn("No recommendations returned for user ID: {}", userId);

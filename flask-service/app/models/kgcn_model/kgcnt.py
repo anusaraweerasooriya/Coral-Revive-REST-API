@@ -70,11 +70,24 @@ def ctr_eval(sess, model, data, batch_size):
     start = 0
     auc_list = []
     f1_list = []
+    
     while start + batch_size <= data.shape[0]:
-        auc, f1 = model.eval(sess, get_feed_dict(model, data, start, start + batch_size))
+        labels, scores = sess.run([model.labels, model.scores_normalized], feed_dict=get_feed_dict(model, data, start, start + batch_size))
+        
+        if len(set(labels)) == 1:
+            print("Warning: Only one class present in y_true. Skipping ROC AUC calculation for this batch.")
+            auc = 0.5  
+        else:
+            auc = roc_auc_score(y_true=labels, y_score=scores)
+
+        scores[scores >= 0.5] = 1
+        scores[scores < 0.5] = 0
+        f1 = f1_score(y_true=labels, y_pred=scores)
+        
         auc_list.append(auc)
         f1_list.append(f1)
         start += batch_size
+    
     return float(np.mean(auc_list)), float(np.mean(f1_list))
 
 def topk_eval(sess, model, user_list, train_record, test_record, item_set, k_list, batch_size):
