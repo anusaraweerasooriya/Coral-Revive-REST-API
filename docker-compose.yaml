@@ -82,7 +82,7 @@ services:
       dockerfile: Dockerfile
     mem_limit: 700m
     ports:
-      - "8888:8765"
+      - "80:8765"
     networks:
       - microservices-network
     depends_on:
