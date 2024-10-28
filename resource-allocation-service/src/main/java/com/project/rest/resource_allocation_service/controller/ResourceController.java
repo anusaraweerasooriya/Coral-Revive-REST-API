@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/resources")
+@RequestMapping("/resource-allocation-service/resources")
 public class ResourceController {
 
     @Autowired
